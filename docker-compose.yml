@@ -1,0 +1,21 @@
+version: "3"
+
+services: 
+    server:
+        container_name: "server"
+        build: "./"
+        ports: 
+            - "80:8080"
+        depends_on: 
+            - postgresDB
+            
+    postgresDB:
+        container_name: "postgresDB"
+        image: postgres:latest
+        restart: always
+        environment: 
+            POSTGRES_PASSWORD: "postgres"
+            POSTGRES_DB: "postgres"
+            POSTGRES_USER: "postgres"
+        ports: 
+            - "5432:5432"
