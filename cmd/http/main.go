@@ -13,7 +13,7 @@ import (
 
 func main() {
 	// read config
-	errLoad := godotenv.Load("../../config/")
+	errLoad := godotenv.Load("../../config/.env")
 	if errLoad != nil {
 		log.Fatal("Error loading config")
 	}
@@ -22,7 +22,7 @@ func main() {
 
 	router := routes.Handler()
 	fmt.Println("Start HTTP server")
-	if err := http.ListenAndServe(fmt.Sprintf(":%s", port), router); err != nil {
+	if err := http.ListenAndServe(fmt.Sprintf(":%s", port), routes.Middleware(router)); err != nil {
 		log.Fatal(err)
 	}
 }
