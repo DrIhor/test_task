@@ -8,14 +8,15 @@ services:
             - "80:8080"
         depends_on: 
             - postgresDB
-            
-    postgresDB:
-        container_name: "postgresDB"
-        image: postgres:latest
-        restart: always
-        environment: 
-            POSTGRES_PASSWORD: "postgres"
-            POSTGRES_DB: "postgres"
-            POSTGRES_USER: "postgres"
-        ports: 
-            - "5432:5432"
+
+    // future part
+    # postgresDB:
+    #     container_name: "postgresDB"
+    #     image: postgres:latest
+    #     restart: always
+    #     environment: 
+    #         POSTGRES_PASSWORD: "postgres"
+    #         POSTGRES_DB: "postgres"
+    #         POSTGRES_USER: "postgres"
+    #     ports: 
+    #         - "5432:5432"

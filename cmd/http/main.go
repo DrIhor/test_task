@@ -1,28 +1,31 @@
 package main
 
 import (
-	"fmt"
 	"log"
-	"net/http"
 	"os"
 
-	"github.com/joho/godotenv"
-
-	"github.com/DrIhor/test_task/internal/routes"
+	"github.com/DrIhor/test_task/internal/service/transport/httpServer"
 )
+
+func init() {
+	os.Setenv("storage-type", "in-memory")
+	os.Setenv("server-port", "8080")
+	os.Setenv("storage-host", "")
+
+}
 
 func main() {
 	// read config
-	errLoad := godotenv.Load("../../config/.env")
-	if errLoad != nil {
-		log.Fatal("Error loading config")
+	server := httpServer.New()
+	if err := server.ServerAddrConfig(); err != nil {
+		log.Fatal("Can`t get config of server: ", err)
+	}
+	if err := server.ConfigStorage(); err != nil {
+		log.Fatal("Can`t config storage: ", err)
 	}
 
-	port := os.Getenv("SERVER_PORT")
-
-	router := routes.Handler()
-	fmt.Println("Start HTTP server")
-	if err := http.ListenAndServe(fmt.Sprintf(":%s", port), routes.Middleware(router)); err != nil {
-		log.Fatal(err)
+	server.GetRouters()
+	if err := server.Start(); err != nil {
+		log.Fatal("Problems with server run: ", err)
 	}
 }
