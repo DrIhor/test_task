@@ -8,9 +8,9 @@ import (
 )
 
 func init() {
-	os.Setenv("storage-type", "in-memory")
-	os.Setenv("server-port", "8080")
-	os.Setenv("storage-host", "")
+	os.Setenv("STORAGE", "in-memory")
+	os.Setenv("SERVER_PORT", "8080")
+	os.Setenv("SERVER_HOST", "")
 
 }
 

@@ -7,28 +7,28 @@ import (
 	iteamsModel "github.com/DrIhor/test_task/internal/models/iteams"
 )
 
-type IteamsStorage struct {
-	list map[string]iteamsModel.Iteam
+type DB struct {
+	items map[string]iteamsModel.Iteam
 }
 
-func NewIteamList() *IteamsStorage {
-	return &IteamsStorage{
-		list: make(map[string]iteamsModel.Iteam),
+func New() *DB {
+	return &DB{
+		items: make(map[string]iteamsModel.Iteam),
 	}
 }
 
-func (iteams *IteamsStorage) AddNewIteam(newIteam iteamsModel.Iteam) error {
-	if _, ok := iteams.list[newIteam.Name]; ok {
+func (db *DB) AddNewIteam(newIteam iteamsModel.Iteam) error {
+	if _, ok := db.items[newIteam.Name]; ok {
 		return errors.New("Current row data exist. Try modify!")
 	}
 
-	iteams.list[newIteam.Name] = newIteam
+	db.items[newIteam.Name] = newIteam
 	return nil
 }
 
-func (iteams *IteamsStorage) GetAllIteams() ([]byte, error) {
+func (db *DB) GetAllIteams() ([]byte, error) {
 	var iteamsSlice []iteamsModel.Iteam
-	for _, value := range iteams.list {
+	for _, value := range db.items {
 		iteamsSlice = append(iteamsSlice, value)
 	}
 
@@ -41,12 +41,12 @@ func (iteams *IteamsStorage) GetAllIteams() ([]byte, error) {
 
 }
 
-func (iteams *IteamsStorage) GetIteam(name string) ([]byte, error) {
-	if _, ok := iteams.list[name]; !ok {
+func (db *DB) GetIteam(name string) ([]byte, error) {
+	if _, ok := db.items[name]; !ok {
 		return nil, errors.New("Current row data exist. Try modify!")
 	}
 
-	res, err := json.Marshal(iteams.list[name])
+	res, err := json.Marshal(db.items[name])
 	if err != nil {
 		return nil, err
 	}
@@ -54,29 +54,29 @@ func (iteams *IteamsStorage) GetIteam(name string) ([]byte, error) {
 	return res, nil
 }
 
-func (iteams *IteamsStorage) DeleteIteam(iteamName string) error {
-	if _, ok := iteams.list[iteamName]; !ok {
+func (db *DB) DeleteIteam(iteamName string) error {
+	if _, ok := db.items[iteamName]; !ok {
 		return errors.New("Current row data not exist. Try to add!")
 	}
 
-	delete(iteams.list, iteamName)
+	delete(db.items, iteamName)
 	return nil
 }
 
-func (iteams *IteamsStorage) UpdateIteam(iteamName string) ([]byte, error) {
-	val, ok := iteams.list[iteamName]
+func (db *DB) UpdateIteam(iteamName string) ([]byte, error) {
+	val, ok := db.items[iteamName]
 	if !ok {
 		return nil, errors.New("Current row data not exist. Try to add!")
 	}
 
 	if val.IteamsNumber-1 <= 0 {
-		delete(iteams.list, iteamName)
+		delete(db.items, iteamName)
 		return nil, errors.New("Iteam ended!!!")
 	}
 
 	// save new value
 	val.IteamsNumber--
-	iteams.list[iteamName] = val
+	db.items[iteamName] = val
 
 	// return result
 	res, err := json.Marshal(val)

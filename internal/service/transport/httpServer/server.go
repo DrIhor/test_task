@@ -18,7 +18,7 @@ import (
 type Server struct {
 	config  *configs.Config
 	router  *mux.Router
-	storage iteams.IteamServices
+	storage iteams.IteamStorageServices
 }
 
 func New() *Server {
@@ -28,23 +28,23 @@ func New() *Server {
 }
 
 func (s *Server) ServerAddrConfig() error {
-	port := os.Getenv("server-port")
+	port := os.Getenv("SERVER_PORT")
 	if port == "" {
 		return errors.New("Wrong port")
 	}
 
 	s.config = &configs.Config{
-		Host: os.Getenv("server-host"),
+		Host: os.Getenv("SERVER_HOST"),
 		Port: port,
 	}
 	return nil
 }
 
 func (s *Server) ConfigStorage() error {
-	storageType := os.Getenv("storage-type")
+	storageType := os.Getenv("STORAGE")
 	switch storageType {
 	case "in-memory":
-		stor := iteamsStor.NewIteamList()
+		stor := iteamsStor.New()
 		s.storage = stor
 		return nil
 	}
@@ -52,7 +52,7 @@ func (s *Server) ConfigStorage() error {
 }
 
 func (s *Server) GetRouters() {
-	routes.Handler(s.router, s.storage)
+	routes.HandlerItems(s.router, s.storage)
 }
 
 func (s *Server) getHttpAddress() string {

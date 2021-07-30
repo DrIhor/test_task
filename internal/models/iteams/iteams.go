@@ -7,7 +7,8 @@ type Iteam struct {
 	Description  string `json:"desc"`
 }
 
-type IteamServices interface {
+// all main services for Iteam to work with DB
+type IteamStorageServices interface {
 	AddNewIteam(Iteam) error
 	GetAllIteams() ([]byte, error)
 	GetIteam(string) ([]byte, error)
