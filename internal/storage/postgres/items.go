@@ -30,6 +30,8 @@ func New() *PostgreStorage {
 		log.Fatal(err)
 	}
 
+	fmt.Println("DB connected")
+
 	return &PostgreStorage{db: conn}
 }
 
@@ -87,14 +89,37 @@ func (postgre *PostgreStorage) GetItem(name string) ([]byte, error) {
 	}
 
 	return res, nil
-
-	return nil, nil
 }
 
 func (postgre *PostgreStorage) DeleteItem(itemName string) error {
+	_, err := postgre.db.Exec(
+		`DELETE FROM "items" WHERE name=&1`,
+		itemName,
+	)
+
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
 func (postgre *PostgreStorage) UpdateItem(itemName string) ([]byte, error) {
-	return nil, nil
+	var item itemsModel.Item
+
+	err := postgre.db.QueryRow(
+		`UPDATE "user" SET number=number - 1 WHERE name=$1 RETURNING name, price, number, description`,
+		itemName,
+	).Scan(&item.Name, &item.Price, &item.ItemsNumber, &item.Description)
+	if err != nil {
+		return nil, err
+	}
+
+	// return result
+	res, err := json.Marshal(item)
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
 }
