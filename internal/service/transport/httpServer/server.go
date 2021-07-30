@@ -6,11 +6,12 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/DrIhor/test_task/internal/models/iteams"
+	"github.com/DrIhor/test_task/internal/models/items"
 	configs "github.com/DrIhor/test_task/internal/models/server"
 	routes "github.com/DrIhor/test_task/internal/routes"
 
-	iteamsStor "github.com/DrIhor/test_task/internal/storage/memory"
+	"github.com/DrIhor/test_task/internal/storage/memory"
+	"github.com/DrIhor/test_task/internal/storage/postgres"
 
 	"github.com/gorilla/mux"
 )
@@ -18,7 +19,7 @@ import (
 type Server struct {
 	config  *configs.Config
 	router  *mux.Router
-	storage iteams.IteamStorageServices
+	storage items.ItemStorageServices
 }
 
 func New() *Server {
@@ -44,9 +45,14 @@ func (s *Server) ConfigStorage() error {
 	storageType := os.Getenv("STORAGE")
 	switch storageType {
 	case "in-memory":
-		stor := iteamsStor.New()
+		stor := memory.New()
 		s.storage = stor
 		return nil
+	case "postgres":
+		stor := postgres.New()
+		s.storage = stor
+		return nil
+
 	}
 	return errors.New("No such storage")
 }

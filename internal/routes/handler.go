@@ -4,36 +4,36 @@ import (
 	"encoding/json"
 	"net/http"
 
-	iteamModel "github.com/DrIhor/test_task/internal/models/iteams"
+	itemModel "github.com/DrIhor/test_task/internal/models/items"
 	msgServ "github.com/DrIhor/test_task/internal/service/messages"
 
 	"github.com/gorilla/mux"
 )
 
 // типу краще ініціалізовувати сервіси для БД чи передавати їх як параметр
-func HandlerItems(router *mux.Router, stor iteamModel.IteamStorageServices) {
-	router.HandleFunc("/iteams", func(w http.ResponseWriter, r *http.Request) {
-		ShowAllIteams(w, r, stor)
+func HandlerItems(router *mux.Router, stor itemModel.ItemStorageServices) {
+	router.HandleFunc("/items", func(w http.ResponseWriter, r *http.Request) {
+		ShowAllItems(w, r, stor)
 	}).Methods("GET")
-	router.HandleFunc("/iteams/{name}", func(w http.ResponseWriter, r *http.Request) {
-		ShowIteam(w, r, stor)
+	router.HandleFunc("/items/{name}", func(w http.ResponseWriter, r *http.Request) {
+		ShowItem(w, r, stor)
 	}).Methods("GET")
-	router.HandleFunc("/iteams", func(w http.ResponseWriter, r *http.Request) {
-		AddNewIteam(w, r, stor)
+	router.HandleFunc("/items", func(w http.ResponseWriter, r *http.Request) {
+		AddNewItem(w, r, stor)
 	}).Methods("POST")
-	router.HandleFunc("/iteams/{name}", func(w http.ResponseWriter, r *http.Request) {
-		BuyIteams(w, r, stor)
+	router.HandleFunc("/items/{name}", func(w http.ResponseWriter, r *http.Request) {
+		BuyItems(w, r, stor)
 	}).Methods("PUT")
-	router.HandleFunc("/iteams/{name}", func(w http.ResponseWriter, r *http.Request) {
-		DeleteIteam(w, r, stor)
+	router.HandleFunc("/items/{name}", func(w http.ResponseWriter, r *http.Request) {
+		DeleteItem(w, r, stor)
 	}).Methods("DELETE")
 }
 
-// CRUD implementation
+// CRUD implementation for all endpoints
 // Read
-func ShowAllIteams(w http.ResponseWriter, r *http.Request, stor iteamModel.IteamStorageServices) {
+func ShowAllItems(w http.ResponseWriter, r *http.Request, stor itemModel.ItemStorageServices) {
 
-	res, err := stor.GetAllIteams()
+	res, err := stor.GetAllItems()
 	if err != nil {
 		res = msgServ.CreateMsgResp(err.Error())
 		w.Write(res)
@@ -43,10 +43,10 @@ func ShowAllIteams(w http.ResponseWriter, r *http.Request, stor iteamModel.Iteam
 	w.Write(res)
 }
 
-func ShowIteam(w http.ResponseWriter, r *http.Request, stor iteamModel.IteamStorageServices) {
+func ShowItem(w http.ResponseWriter, r *http.Request, stor itemModel.ItemStorageServices) {
 	params := mux.Vars(r)
 
-	res, err := stor.GetIteam(params["name"])
+	res, err := stor.GetItem(params["name"])
 	if err != nil {
 		res = msgServ.CreateMsgResp(err.Error())
 		w.Write(res)
@@ -57,9 +57,9 @@ func ShowIteam(w http.ResponseWriter, r *http.Request, stor iteamModel.IteamStor
 }
 
 // Create
-func AddNewIteam(w http.ResponseWriter, r *http.Request, stor iteamModel.IteamStorageServices) {
+func AddNewItem(w http.ResponseWriter, r *http.Request, stor itemModel.ItemStorageServices) {
 
-	var obj iteamModel.Iteam
+	var obj itemModel.Item
 	err := json.NewDecoder(r.Body).Decode(&obj)
 	if err != nil {
 		res := msgServ.CreateMsgResp(err.Error())
@@ -67,13 +67,13 @@ func AddNewIteam(w http.ResponseWriter, r *http.Request, stor iteamModel.IteamSt
 		return
 	}
 
-	if (obj == iteamModel.Iteam{}) {
+	if (obj == itemModel.Item{}) {
 		res := msgServ.CreateMsgResp("Empty body. Change information")
 		w.Write(res)
 		return
 	}
 
-	err = stor.AddNewIteam(obj)
+	err = stor.AddNewItem(obj)
 	if err != nil {
 		res := msgServ.CreateMsgResp("Empty body. Change information")
 		w.Write(res)
@@ -83,10 +83,10 @@ func AddNewIteam(w http.ResponseWriter, r *http.Request, stor iteamModel.IteamSt
 }
 
 // Update
-func BuyIteams(w http.ResponseWriter, r *http.Request, stor iteamModel.IteamStorageServices) {
+func BuyItems(w http.ResponseWriter, r *http.Request, stor itemModel.ItemStorageServices) {
 	params := mux.Vars(r)
 
-	res, err := stor.UpdateIteam(params["name"])
+	res, err := stor.UpdateItem(params["name"])
 	if err != nil {
 		res := msgServ.CreateMsgResp("Empty body. Change information")
 		w.Write(res)
@@ -97,10 +97,10 @@ func BuyIteams(w http.ResponseWriter, r *http.Request, stor iteamModel.IteamStor
 }
 
 // Delete
-func DeleteIteam(w http.ResponseWriter, r *http.Request, stor iteamModel.IteamStorageServices) {
+func DeleteItem(w http.ResponseWriter, r *http.Request, stor itemModel.ItemStorageServices) {
 	params := mux.Vars(r)
 
-	err := stor.DeleteIteam(params["name"])
+	err := stor.DeleteItem(params["name"])
 	if err != nil {
 		res := msgServ.CreateMsgResp("Empty body. Change information")
 		w.Write(res)

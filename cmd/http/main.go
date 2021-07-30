@@ -8,9 +8,16 @@ import (
 )
 
 func init() {
-	os.Setenv("STORAGE", "in-memory")
+	os.Setenv("STORAGE", "postgres")
 	os.Setenv("SERVER_PORT", "8080")
 	os.Setenv("SERVER_HOST", "")
+
+	// postgres
+	os.Setenv("POSTGRE_HOST", "localhost")
+	os.Setenv("POSTGRE_PORT", "5432")
+	os.Setenv("POSTGRE_USER", "postgres")
+	os.Setenv("POSTGRE_PASS", "postgres")
+	os.Setenv("POSTGRE_DB", "postgres")
 
 }
 
