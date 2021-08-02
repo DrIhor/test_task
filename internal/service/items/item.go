@@ -19,6 +19,10 @@ func (itemSrv *ItemServices) AddNewItem(item items.Item) error {
 	return itemSrv.storage.AddNewItem(item)
 }
 
+func (itemSrv *ItemServices) GetAllItems() ([]byte, error) {
+	return itemSrv.storage.GetAllItems()
+}
+
 func (itemSrv *ItemServices) GetItem(itemName string) ([]byte, error) {
 	return itemSrv.storage.GetItem(itemName)
 }

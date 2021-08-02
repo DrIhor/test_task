@@ -5,35 +5,39 @@ import (
 	"net/http"
 
 	itemModel "github.com/DrIhor/test_task/internal/models/items"
+	itemServ "github.com/DrIhor/test_task/internal/service/items"
+
 	msgServ "github.com/DrIhor/test_task/internal/service/messages"
 
 	"github.com/gorilla/mux"
 )
 
+type HandlerItemsServ struct {
+	router   *mux.Router
+	services *itemServ.ItemServices
+}
+
+func New(router *mux.Router, stor itemModel.ItemStorageServices) *HandlerItemsServ {
+	return &HandlerItemsServ{
+		router:   router,
+		services: itemServ.New(stor),
+	}
+}
+
 // типу краще ініціалізовувати сервіси для БД чи передавати їх як параметр
-func HandlerItems(router *mux.Router, stor itemModel.ItemStorageServices) {
-	router.HandleFunc("/items", func(w http.ResponseWriter, r *http.Request) {
-		ShowAllItems(w, r, stor)
-	}).Methods("GET")
-	router.HandleFunc("/items/{name}", func(w http.ResponseWriter, r *http.Request) {
-		ShowItem(w, r, stor)
-	}).Methods("GET")
-	router.HandleFunc("/items", func(w http.ResponseWriter, r *http.Request) {
-		AddNewItem(w, r, stor)
-	}).Methods("POST")
-	router.HandleFunc("/items/{name}", func(w http.ResponseWriter, r *http.Request) {
-		BuyItems(w, r, stor)
-	}).Methods("PUT")
-	router.HandleFunc("/items/{name}", func(w http.ResponseWriter, r *http.Request) {
-		DeleteItem(w, r, stor)
-	}).Methods("DELETE")
+func (h *HandlerItemsServ) HandlerItems() {
+	h.router.HandleFunc("/items", h.ShowAllItems).Methods("GET")
+	h.router.HandleFunc("/items/{name}", h.ShowItem).Methods("GET")
+	h.router.HandleFunc("/items", h.AddNewItem).Methods("POST")
+	h.router.HandleFunc("/items/{name}", h.BuyItems).Methods("PUT")
+	h.router.HandleFunc("/items/{name}", h.DeleteItem).Methods("DELETE")
 }
 
 // CRUD implementation for all endpoints
 // Read
-func ShowAllItems(w http.ResponseWriter, r *http.Request, stor itemModel.ItemStorageServices) {
+func (h *HandlerItemsServ) ShowAllItems(w http.ResponseWriter, r *http.Request) {
 
-	res, err := stor.GetAllItems()
+	res, err := h.services.GetAllItems()
 	if err != nil {
 		res = msgServ.CreateMsgResp(err.Error())
 		w.Write(res)
@@ -43,10 +47,10 @@ func ShowAllItems(w http.ResponseWriter, r *http.Request, stor itemModel.ItemSto
 	w.Write(res)
 }
 
-func ShowItem(w http.ResponseWriter, r *http.Request, stor itemModel.ItemStorageServices) {
+func (h *HandlerItemsServ) ShowItem(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 
-	res, err := stor.GetItem(params["name"])
+	res, err := h.services.GetItem(params["name"])
 	if err != nil {
 		res = msgServ.CreateMsgResp(err.Error())
 		w.Write(res)
@@ -57,7 +61,7 @@ func ShowItem(w http.ResponseWriter, r *http.Request, stor itemModel.ItemStorage
 }
 
 // Create
-func AddNewItem(w http.ResponseWriter, r *http.Request, stor itemModel.ItemStorageServices) {
+func (h *HandlerItemsServ) AddNewItem(w http.ResponseWriter, r *http.Request) {
 
 	var obj itemModel.Item
 	err := json.NewDecoder(r.Body).Decode(&obj)
@@ -73,9 +77,9 @@ func AddNewItem(w http.ResponseWriter, r *http.Request, stor itemModel.ItemStora
 		return
 	}
 
-	err = stor.AddNewItem(obj)
+	err = h.services.AddNewItem(obj)
 	if err != nil {
-		res := msgServ.CreateMsgResp("Empty body. Change information")
+		res := msgServ.CreateMsgResp(err.Error())
 		w.Write(res)
 		return
 	}
@@ -83,12 +87,12 @@ func AddNewItem(w http.ResponseWriter, r *http.Request, stor itemModel.ItemStora
 }
 
 // Update
-func BuyItems(w http.ResponseWriter, r *http.Request, stor itemModel.ItemStorageServices) {
+func (h *HandlerItemsServ) BuyItems(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 
-	res, err := stor.UpdateItem(params["name"])
+	res, err := h.services.UpdateItem(params["name"])
 	if err != nil {
-		res := msgServ.CreateMsgResp("Empty body. Change information")
+		res := msgServ.CreateMsgResp(err.Error())
 		w.Write(res)
 		return
 	}
@@ -97,12 +101,12 @@ func BuyItems(w http.ResponseWriter, r *http.Request, stor itemModel.ItemStorage
 }
 
 // Delete
-func DeleteItem(w http.ResponseWriter, r *http.Request, stor itemModel.ItemStorageServices) {
+func (h *HandlerItemsServ) DeleteItem(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 
-	err := stor.DeleteItem(params["name"])
+	err := h.services.DeleteItem(params["name"])
 	if err != nil {
-		res := msgServ.CreateMsgResp("Empty body. Change information")
+		res := msgServ.CreateMsgResp(err.Error())
 		w.Write(res)
 		return
 	}

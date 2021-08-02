@@ -58,7 +58,8 @@ func (s *Server) ConfigStorage() error {
 }
 
 func (s *Server) GetRouters() {
-	routes.HandlerItems(s.router, s.storage)
+	itemsHandler := routes.New(s.router, s.storage)
+	itemsHandler.HandlerItems()
 }
 
 func (s *Server) getHttpAddress() string {

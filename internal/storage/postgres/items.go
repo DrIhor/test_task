@@ -93,7 +93,7 @@ func (postgre *PostgreStorage) GetItem(name string) ([]byte, error) {
 
 func (postgre *PostgreStorage) DeleteItem(itemName string) error {
 	_, err := postgre.db.Exec(
-		`DELETE FROM "items" WHERE name=&1`,
+		`DELETE FROM "items" WHERE name=$1`,
 		itemName,
 	)
 
@@ -108,7 +108,7 @@ func (postgre *PostgreStorage) UpdateItem(itemName string) ([]byte, error) {
 	var item itemsModel.Item
 
 	err := postgre.db.QueryRow(
-		`UPDATE "user" SET number=number - 1 WHERE name=$1 RETURNING name, price, number, description`,
+		`UPDATE "items" SET number=number - 1 WHERE name=$1 RETURNING name, price, number, description`,
 		itemName,
 	).Scan(&item.Name, &item.Price, &item.ItemsNumber, &item.Description)
 	if err != nil {
