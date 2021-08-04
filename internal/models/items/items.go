@@ -2,8 +2,8 @@ package items
 
 type Item struct {
 	Name        string `json:"name"`
-	Price       int    `json:"price"`
-	ItemsNumber int    `json:"itemsNumber"`
+	Price       int32  `json:"price"`
+	ItemsNumber int32  `json:"itemsNumber"`
 	Description string `json:"desc"`
 }
 
