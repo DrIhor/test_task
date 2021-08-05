@@ -3,8 +3,10 @@ package routes
 import (
 	"encoding/json"
 	"net/http"
+	"os"
 
 	itemModel "github.com/DrIhor/test_task/internal/models/items"
+	"github.com/DrIhor/test_task/internal/service/connectors"
 	itemServ "github.com/DrIhor/test_task/internal/service/items"
 
 	msgServ "github.com/DrIhor/test_task/internal/service/messages"
@@ -37,9 +39,18 @@ func (h *HandlerItemsServ) HandlerItems() {
 // Read
 func (h *HandlerItemsServ) ShowAllItems(w http.ResponseWriter, r *http.Request) {
 
-	res, err := h.services.GetAllItems()
-	if err != nil {
-		res = msgServ.CreateMsgResp(err.Error())
+	var errData error
+	var res []byte
+	switch os.Getenv("STORAGE_TYPE") {
+	case "":
+		res, errData = h.services.GetAllItems()
+	case "grpc":
+		grpcConn := connectors.NewGRPC(os.Getenv("GRCP_ADDR"))
+		res, errData = grpcConn.GetAllItems()
+	}
+
+	if errData != nil {
+		res = msgServ.CreateMsgResp(errData.Error())
 		w.Write(res)
 		return
 	}
@@ -50,9 +61,18 @@ func (h *HandlerItemsServ) ShowAllItems(w http.ResponseWriter, r *http.Request) 
 func (h *HandlerItemsServ) ShowItem(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 
-	res, err := h.services.GetItem(params["name"])
-	if err != nil {
-		res = msgServ.CreateMsgResp(err.Error())
+	var errData error
+	var res []byte
+	switch os.Getenv("STORAGE_TYPE") {
+	case "":
+		res, errData = h.services.UpdateItem(params["name"])
+	case "grpc":
+		grpcConn := connectors.NewGRPC(os.Getenv("GRCP_ADDR"))
+		res, errData = grpcConn.GetItem(params["name"])
+	}
+
+	if errData != nil {
+		res = msgServ.CreateMsgResp(errData.Error())
 		w.Write(res)
 		return
 	}
@@ -77,22 +97,38 @@ func (h *HandlerItemsServ) AddNewItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.services.AddNewItem(obj)
-	if err != nil {
-		res := msgServ.CreateMsgResp(err.Error())
+	var errData error
+	switch os.Getenv("STORAGE_TYPE") {
+	case "":
+		errData = h.services.AddNewItem(obj)
+	case "grpc":
+		grpcConn := connectors.NewGRPC(os.Getenv("GRCP_ADDR"))
+		_, errData = grpcConn.AddNewItem(obj)
+	}
+
+	if errData != nil {
+		res := msgServ.CreateMsgResp(errData.Error())
 		w.Write(res)
 		return
 	}
-
 }
 
 // Update
 func (h *HandlerItemsServ) BuyItems(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 
-	res, err := h.services.UpdateItem(params["name"])
-	if err != nil {
-		res := msgServ.CreateMsgResp(err.Error())
+	var errData error
+	var res []byte
+	switch os.Getenv("STORAGE_TYPE") {
+	case "":
+		res, errData = h.services.UpdateItem(params["name"])
+	case "grpc":
+		grpcConn := connectors.NewGRPC(os.Getenv("GRCP_ADDR"))
+		res, errData = grpcConn.UpdateItem(params["name"])
+	}
+
+	if errData != nil {
+		res := msgServ.CreateMsgResp(errData.Error())
 		w.Write(res)
 		return
 	}
@@ -104,9 +140,17 @@ func (h *HandlerItemsServ) BuyItems(w http.ResponseWriter, r *http.Request) {
 func (h *HandlerItemsServ) DeleteItem(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 
-	err := h.services.DeleteItem(params["name"])
-	if err != nil {
-		res := msgServ.CreateMsgResp(err.Error())
+	var errData error
+	switch os.Getenv("STORAGE_TYPE") {
+	case "":
+		errData = h.services.DeleteItem(params["name"])
+	case "grpc":
+		grpcConn := connectors.NewGRPC(os.Getenv("GRCP_ADDR"))
+		_, errData = grpcConn.DeleteItem(params["name"])
+	}
+
+	if errData != nil {
+		res := msgServ.CreateMsgResp(errData.Error())
 		w.Write(res)
 		return
 	}

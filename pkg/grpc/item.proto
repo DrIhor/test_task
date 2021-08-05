@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+package item;
+
+option go_package = "example.com/project/protos/fizz";
+
+service ItemStorage {
+    rpc AddNewItem(Item) returns (NoneObjectResp) {}
+    rpc GetAllItems(NoneObjectRequest) returns (EncodeItemResponse) {}
+    rpc GetItem(ItemName) returns (EncodeItemResponse) {}
+    rpc DeleteItem(ItemName) returns (NoneObjectResp) {}
+    rpc UpdateItem(ItemName) returns (EncodeItemResponse) {}
+}
+
+
+message NoneObjectRequest{
+}
+
+message NoneObjectResp{
+    bool doneWork = 1;
+}
+
+
+message Item {
+    string name = 1;
+    int32 price = 2;
+    int32 itemsNumber = 3;
+    string description = 4;
+}
+
+message ItemName {
+    string name = 1;
+}
+
+
+message EncodeItemResponse {
+    bytes result = 1;
+}

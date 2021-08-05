@@ -1,0 +1,77 @@
+package gRPC
+
+import (
+	"errors"
+	"fmt"
+	"log"
+	"net"
+	"os"
+
+	configs "github.com/DrIhor/test_task/internal/models/server"
+	"google.golang.org/grpc"
+
+	pb "github.com/DrIhor/test_task/pkg/grpc"
+
+	"github.com/DrIhor/test_task/internal/models/items"
+	"github.com/DrIhor/test_task/internal/storage/memory"
+	"github.com/DrIhor/test_task/internal/storage/postgres"
+)
+
+type Server struct {
+	config *configs.Config
+	pb.UnimplementedItemStorageServer
+	storage items.ItemStorageServices
+}
+
+func New() *Server {
+	return &Server{}
+}
+
+func (s *Server) ServerAddrConfig() error {
+	port := os.Getenv("GRCP_PORT")
+	if port == "" {
+		return errors.New("Wrong port")
+	}
+
+	s.config = &configs.Config{
+		Host: os.Getenv("GRCP_HOST"),
+		Port: port,
+	}
+	return nil
+}
+
+func (s *Server) ConfigStorage() error {
+	storageType := os.Getenv("STORAGE")
+	switch storageType {
+	case "in-memory":
+		stor := memory.New()
+		s.storage = stor
+		return nil
+	case "postgres":
+		stor := postgres.New()
+		s.storage = stor
+		return nil
+	}
+
+	return errors.New("No such storage")
+}
+
+func (s *Server) getHttpAddress() string {
+	return fmt.Sprintf("%s:%s", s.config.Host, s.config.Port)
+}
+
+func (s *Server) Start() error {
+	lis, err := net.Listen("tcp", os.Getenv("GRCP_ADDR"))
+	if err != nil {
+		log.Fatalf("failed to listen: %v", err)
+	}
+
+	opts := []grpc.ServerOption{}
+	sr := grpc.NewServer(opts...)
+	pb.RegisterItemStorageServer(sr, s)
+	if err := sr.Serve(lis); err != nil {
+		log.Fatalf("failed to serve: %v", err)
+	}
+
+	return nil
+}
