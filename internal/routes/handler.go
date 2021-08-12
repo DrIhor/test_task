@@ -232,7 +232,7 @@ func (h *HandlerItemsServ) DeleteItem(w http.ResponseWriter, r *http.Request) {
 func (h *HandlerItemsServ) AddDataFromCSV(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseMultipartForm(256) // limit your max input length!
 	if err != nil {
-		panic(err)
+		w.WriteHeader(http.StatusBadRequest)
 	}
 
 	r.Body = http.MaxBytesReader(w, r.Body, 5*1024*1024) // max is 5 MB
@@ -262,10 +262,11 @@ func (h *HandlerItemsServ) AddDataFromCSV(w http.ResponseWriter, r *http.Request
 
 	for {
 		row, err := rd.Read()
-		if err == io.EOF {
-			break
-		}
 		if err != nil {
+			if err == io.EOF {
+				break
+			}
+
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
