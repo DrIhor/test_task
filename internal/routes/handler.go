@@ -1,8 +1,8 @@
 package routes
 
 import (
-	"bufio"
 	"bytes"
+	"encoding/csv"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -253,7 +253,7 @@ func (h *HandlerItemsServ) AddDataFromCSV(w http.ResponseWriter, r *http.Request
 	//
 	// start read file data
 	//
-	rd := bufio.NewReader(file)
+	rd := csv.NewReader(file)
 	var (
 		itemHeader string        // struct fields
 		firstRow   bool   = true // if file header
@@ -261,7 +261,7 @@ func (h *HandlerItemsServ) AddDataFromCSV(w http.ResponseWriter, r *http.Request
 	)
 
 	for {
-		row, err := rd.ReadString(byte('\n')) //loading chunk into buffer as row(may be diff size of data)
+		row, err := rd.Read()
 		if err == io.EOF {
 			break
 		}
@@ -272,12 +272,12 @@ func (h *HandlerItemsServ) AddDataFromCSV(w http.ResponseWriter, r *http.Request
 
 		// init header
 		if firstRow {
-			itemHeader = row
+			itemHeader = strings.Join(row, ",") + "\n" // create single row for csvutil lib
 			firstRow = false
 			continue
 		}
 
-		csvIteam := []byte(itemHeader + row)
+		csvIteam := []byte(itemHeader + strings.Join(row, ","))
 		var items []itemModel.Item
 		if err := csvutil.Unmarshal(csvIteam, &items); err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
