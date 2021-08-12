@@ -240,7 +240,8 @@ func (h *HandlerItemsServ) AddDataFromCSV(w http.ResponseWriter, r *http.Request
 	// upload file
 	file, fileHeader, err := r.FormFile("file")
 	if err != nil {
-		panic(err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
 	}
 
 	// log some data
@@ -265,7 +266,7 @@ func (h *HandlerItemsServ) AddDataFromCSV(w http.ResponseWriter, r *http.Request
 			break
 		}
 		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
+			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 
@@ -279,7 +280,7 @@ func (h *HandlerItemsServ) AddDataFromCSV(w http.ResponseWriter, r *http.Request
 		csvIteam := []byte(itemHeader + row)
 		var items []itemModel.Item
 		if err := csvutil.Unmarshal(csvIteam, &items); err != nil {
-			w.WriteHeader(http.StatusBadRequest)
+			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 
@@ -287,7 +288,7 @@ func (h *HandlerItemsServ) AddDataFromCSV(w http.ResponseWriter, r *http.Request
 			if item != (itemModel.Item{}) {
 				id, err := h.services.AddNewItem(item)
 				if err != nil {
-					w.WriteHeader(http.StatusBadRequest)
+					w.WriteHeader(http.StatusInternalServerError)
 					return
 				}
 				newIDs = append(newIDs, id)
@@ -307,16 +308,19 @@ func (h *HandlerItemsServ) AddDataFromCSV(w http.ResponseWriter, r *http.Request
 func (h *HandlerItemsServ) ReturnAllItemsCSV(w http.ResponseWriter, r *http.Request) {
 	byteData, err := h.services.GetAllItems()
 	if err != nil {
-		fmt.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 	var itemsSlice []itemModel.Item
 	if err := json.Unmarshal(byteData, &itemsSlice); err != nil {
-		panic(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 
 	b, err := csvutil.Marshal(itemsSlice)
 	if err != nil {
-		fmt.Println("error:", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 
 	w.Header().Set("Content-Disposition", "multipart/form-data; boundary=something;")
