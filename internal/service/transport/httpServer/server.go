@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/DrIhor/test_task/internal/models/items"
 	configs "github.com/DrIhor/test_task/internal/models/server"
@@ -47,10 +48,13 @@ func (s *Server) ConfigStorage() error {
 	case "in-memory":
 		stor := memory.New()
 		s.storage = stor
+		fmt.Println("Start in-memory DB")
 		return nil
+
 	case "postgres":
 		stor := postgres.New()
 		s.storage = stor
+		fmt.Println("Start Postgres")
 		return nil
 
 	}
@@ -72,6 +76,15 @@ func (s *Server) Start() error {
 	if err != nil {
 		return err
 	}
+
+	server := &http.Server{
+		Addr:         s.getHttpAddress(),
+		Handler:      routes.Middleware(s.router),
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 5 * time.Second,
+	}
+
+	server.ListenAndServe()
 
 	return nil
 }

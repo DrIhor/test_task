@@ -8,22 +8,23 @@ import (
 )
 
 type DB struct {
-	items map[string]itemsModel.Item
+	items map[int]itemsModel.Item
 }
 
 func New() *DB {
 	return &DB{
-		items: make(map[string]itemsModel.Item),
+		items: make(map[int]itemsModel.Item),
 	}
 }
 
-func (db *DB) AddNewItem(newItem itemsModel.Item) error {
-	if _, ok := db.items[newItem.Name]; ok {
-		return errors.New("Current row data exist. Try modify!")
+func (db *DB) AddNewItem(newItem itemsModel.Item) (int, error) {
+	id := len(db.items) + 1
+	if _, ok := db.items[id]; ok {
+		return 0, errors.New("RowExist")
 	}
 
-	db.items[newItem.Name] = newItem
-	return nil
+	db.items[id] = newItem
+	return id, nil
 }
 
 func (db *DB) GetAllItems() ([]byte, error) {
@@ -41,12 +42,12 @@ func (db *DB) GetAllItems() ([]byte, error) {
 
 }
 
-func (db *DB) GetItem(name string) ([]byte, error) {
-	if _, ok := db.items[name]; !ok {
-		return nil, errors.New("Current row data exist. Try modify!")
+func (db *DB) GetItem(id int) ([]byte, error) {
+	if _, ok := db.items[id]; !ok {
+		return nil, errors.New("NotExist")
 	}
 
-	res, err := json.Marshal(db.items[name])
+	res, err := json.Marshal(db.items[id])
 	if err != nil {
 		return nil, err
 	}
@@ -54,29 +55,29 @@ func (db *DB) GetItem(name string) ([]byte, error) {
 	return res, nil
 }
 
-func (db *DB) DeleteItem(itemName string) error {
-	if _, ok := db.items[itemName]; !ok {
-		return errors.New("Current row data not exist. Try to add!")
+func (db *DB) DeleteItem(id int) (bool, error) {
+	if _, ok := db.items[id]; !ok {
+		return false, nil
 	}
 
-	delete(db.items, itemName)
-	return nil
+	delete(db.items, id)
+	return true, nil
 }
 
-func (db *DB) UpdateItem(itemName string) ([]byte, error) {
-	val, ok := db.items[itemName]
+func (db *DB) UpdateItem(id int) ([]byte, error) {
+	val, ok := db.items[id]
 	if !ok {
-		return nil, errors.New("Current row data not exist. Try to add!")
+		return nil, errors.New("NotExist")
 	}
 
 	if val.ItemsNumber-1 <= 0 {
-		delete(db.items, itemName)
-		return nil, errors.New("Item ended!!!")
+		delete(db.items, id)
+		return nil, errors.New("WrongNumber")
 	}
 
 	// save new value
 	val.ItemsNumber--
-	db.items[itemName] = val
+	db.items[id] = val
 
 	// return result
 	res, err := json.Marshal(val)

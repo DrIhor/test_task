@@ -46,18 +46,18 @@ func (s *Server) ConfigStorage() error {
 	case "in-memory":
 		stor := memory.New()
 		s.storage = stor
+		fmt.Println("Start in-memory DB")
 		return nil
+
 	case "postgres":
 		stor := postgres.New()
 		s.storage = stor
+		fmt.Println("Start Postgres")
 		return nil
+
 	}
 
 	return errors.New("No such storage")
-}
-
-func (s *Server) getHttpAddress() string {
-	return fmt.Sprintf("%s:%s", s.config.Host, s.config.Port)
 }
 
 func (s *Server) Start() error {

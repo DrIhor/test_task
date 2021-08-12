@@ -35,26 +35,27 @@ func New() *PostgreStorage {
 	return &PostgreStorage{db: conn}
 }
 
-func (postgre *PostgreStorage) AddNewItem(newItem itemsModel.Item) error {
-	_, err := postgre.db.Exec(
+func (postgre *PostgreStorage) AddNewItem(newItem itemsModel.Item) (int, error) {
+	var newItemID int
+	err := postgre.db.QueryRow(
 		`INSERT INTO "items"(name, price, number, description) VALUES ($1, $2, $3, $4) RETURNING id`,
 		newItem.Name,
 		newItem.Price,
 		newItem.ItemsNumber,
 		newItem.Description,
-	)
+	).Scan(&newItemID)
 
 	if err != nil {
-		return err
+		return 0, err
 	}
 
-	return nil
+	return newItemID, nil
 }
 
 func (postgre *PostgreStorage) GetAllItems() ([]byte, error) {
 	var itemsSlice []itemsModel.Item
 
-	rows, err := postgre.db.Query(`SELECT name, price, number, description FROM "items"`)
+	rows, err := postgre.db.Query(`SELECT id, name, price, number, description FROM "items"`)
 	if err != nil {
 		return nil, err
 	}
@@ -62,7 +63,7 @@ func (postgre *PostgreStorage) GetAllItems() ([]byte, error) {
 
 	for rows.Next() {
 		var item itemsModel.Item
-		if err := rows.Scan(&item.Name, &item.Price, &item.ItemsNumber, &item.Description); err != nil {
+		if err := rows.Scan(&item.ID, &item.Name, &item.Price, &item.ItemsNumber, &item.Description); err != nil {
 			return nil, err
 		}
 		itemsSlice = append(itemsSlice, item)
@@ -76,10 +77,10 @@ func (postgre *PostgreStorage) GetAllItems() ([]byte, error) {
 	return res, nil
 }
 
-func (postgre *PostgreStorage) GetItem(name string) ([]byte, error) {
+func (postgre *PostgreStorage) GetItem(id int) ([]byte, error) {
 	var item itemsModel.Item
-	err := postgre.db.QueryRow(`SELECT name, price, number, description FROM "items" WHERE name=$1`, name).Scan(&item.Name, &item.Price, &item.ItemsNumber, &item.Description)
-	if err != nil {
+	err := postgre.db.QueryRow(`SELECT name, price, number, description FROM "items" WHERE id=$1`, id).Scan(&item.Name, &item.Price, &item.ItemsNumber, &item.Description)
+	if err != nil && err != sql.ErrNoRows {
 		return nil, err
 	}
 
@@ -91,27 +92,35 @@ func (postgre *PostgreStorage) GetItem(name string) ([]byte, error) {
 	return res, nil
 }
 
-func (postgre *PostgreStorage) DeleteItem(itemName string) error {
-	_, err := postgre.db.Exec(
-		`DELETE FROM "items" WHERE name=$1`,
-		itemName,
+func (postgre *PostgreStorage) DeleteItem(id int) (bool, error) {
+	res, err := postgre.db.Exec(
+		`DELETE FROM "items" WHERE id=$1`,
+		id,
 	)
-
 	if err != nil {
-		return err
+		return false, err
 	}
 
-	return nil
+	affected, err := res.RowsAffected()
+	if err != nil {
+		return false, err
+	}
+
+	if affected <= 0 {
+		return false, nil
+	}
+
+	return true, nil
 }
 
-func (postgre *PostgreStorage) UpdateItem(itemName string) ([]byte, error) {
+func (postgre *PostgreStorage) UpdateItem(id int) ([]byte, error) {
 	var item itemsModel.Item
 
 	err := postgre.db.QueryRow(
-		`UPDATE "items" SET number=number - 1 WHERE name=$1 RETURNING name, price, number, description`,
-		itemName,
+		`UPDATE "items" SET number=number - 1 WHERE id=$1 RETURNING name, price, number, description`,
+		id,
 	).Scan(&item.Name, &item.Price, &item.ItemsNumber, &item.Description)
-	if err != nil {
+	if err != nil && err != sql.ErrNoRows {
 		return nil, err
 	}
 

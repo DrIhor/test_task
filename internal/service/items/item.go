@@ -15,7 +15,7 @@ func New(stor itemModel.ItemStorageServices) *ItemServices {
 	}
 }
 
-func (itemSrv *ItemServices) AddNewItem(item items.Item) error {
+func (itemSrv *ItemServices) AddNewItem(item items.Item) (int, error) {
 	return itemSrv.storage.AddNewItem(item)
 }
 
@@ -23,14 +23,14 @@ func (itemSrv *ItemServices) GetAllItems() ([]byte, error) {
 	return itemSrv.storage.GetAllItems()
 }
 
-func (itemSrv *ItemServices) GetItem(itemName string) ([]byte, error) {
-	return itemSrv.storage.GetItem(itemName)
+func (itemSrv *ItemServices) GetItem(id int) ([]byte, error) {
+	return itemSrv.storage.GetItem(id)
 }
 
-func (itemSrv *ItemServices) DeleteItem(itemName string) error {
-	return itemSrv.storage.DeleteItem(itemName)
+func (itemSrv *ItemServices) DeleteItem(id int) (bool, error) {
+	return itemSrv.storage.DeleteItem(id)
 }
 
-func (itemSrv *ItemServices) UpdateItem(itemName string) ([]byte, error) {
-	return itemSrv.storage.UpdateItem(itemName)
+func (itemSrv *ItemServices) UpdateItem(id int) ([]byte, error) {
+	return itemSrv.storage.UpdateItem(id)
 }

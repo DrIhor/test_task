@@ -2,14 +2,14 @@ syntax = "proto3";
 
 package item;
 
-option go_package = "example.com/project/protos/fizz";
+option go_package = "github.com/DrIhor/test_task";
 
 service ItemStorage {
-    rpc AddNewItem(Item) returns (NoneObjectResp) {}
+    rpc AddNewItem(Item) returns (ItemID) {}
     rpc GetAllItems(NoneObjectRequest) returns (EncodeItemResponse) {}
-    rpc GetItem(ItemName) returns (EncodeItemResponse) {}
-    rpc DeleteItem(ItemName) returns (NoneObjectResp) {}
-    rpc UpdateItem(ItemName) returns (EncodeItemResponse) {}
+    rpc GetItem(ItemID) returns (EncodeItemResponse) {}
+    rpc DeleteItem(ItemID) returns (NoneObjectResp) {}
+    rpc UpdateItem(ItemID) returns (EncodeItemResponse) {}
 }
 
 
@@ -28,8 +28,8 @@ message Item {
     string description = 4;
 }
 
-message ItemName {
-    string name = 1;
+message ItemID {
+    int64 ID = 1;
 }
 
 

@@ -7,7 +7,7 @@ import (
 	pb "github.com/DrIhor/test_task/pkg/grpc"
 )
 
-func (s *Server) AddNewItem(ctx context.Context, in *pb.Item) (*pb.NoneObjectResp, error) {
+func (s *Server) AddNewItem(ctx context.Context, in *pb.Item) (*pb.ItemID, error) {
 	item := items.Item{
 		Name:        in.Name,
 		Price:       in.Price,
@@ -15,13 +15,13 @@ func (s *Server) AddNewItem(ctx context.Context, in *pb.Item) (*pb.NoneObjectRes
 		Description: in.Description,
 	}
 
-	err := s.storage.AddNewItem(item)
+	id, err := s.storage.AddNewItem(item)
 	if err != nil {
 		return nil, err
 	}
 
-	return &pb.NoneObjectResp{
-		DoneWork: true,
+	return &pb.ItemID{
+		ID: int64(id),
 	}, nil
 }
 
@@ -37,9 +37,9 @@ func (s *Server) GetAllItems(ctx context.Context, in *pb.NoneObjectRequest) (*pb
 	}, nil
 }
 
-func (s *Server) GetItem(ctx context.Context, in *pb.ItemName) (*pb.EncodeItemResponse, error) {
+func (s *Server) GetItem(ctx context.Context, in *pb.ItemID) (*pb.EncodeItemResponse, error) {
 
-	res, err := s.storage.GetItem(in.Name)
+	res, err := s.storage.GetItem(int(in.ID))
 	if err != nil {
 		return nil, err
 	}
@@ -49,21 +49,21 @@ func (s *Server) GetItem(ctx context.Context, in *pb.ItemName) (*pb.EncodeItemRe
 	}, nil
 }
 
-func (s *Server) DeleteItem(ctx context.Context, in *pb.ItemName) (*pb.NoneObjectResp, error) {
+func (s *Server) DeleteItem(ctx context.Context, in *pb.ItemID) (*pb.NoneObjectResp, error) {
 
-	err := s.storage.DeleteItem(in.Name)
+	done, err := s.storage.DeleteItem(int(in.ID))
 	if err != nil {
 		return nil, err
 	}
 
 	return &pb.NoneObjectResp{
-		DoneWork: true,
+		DoneWork: done,
 	}, nil
 }
 
-func (s *Server) UpdateItem(ctx context.Context, in *pb.ItemName) (*pb.EncodeItemResponse, error) {
+func (s *Server) UpdateItem(ctx context.Context, in *pb.ItemID) (*pb.EncodeItemResponse, error) {
 
-	res, err := s.storage.UpdateItem(in.Name)
+	res, err := s.storage.UpdateItem(int(in.ID))
 	if err != nil {
 		return nil, err
 	}
