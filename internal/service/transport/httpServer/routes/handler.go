@@ -86,7 +86,7 @@ func (h *HandlerItemsServ) ShowItem(w http.ResponseWriter, r *http.Request) {
 	var res []byte
 	switch os.Getenv("STORAGE_TYPE") {
 	case "":
-		res, errData = h.services.UpdateItem(id)
+		res, errData = h.services.GetItem(id)
 	case "grpc":
 		grpcConn := connectors.NewGRPC(os.Getenv("GRCP_ADDR"))
 		res, errData = grpcConn.GetItem(id)

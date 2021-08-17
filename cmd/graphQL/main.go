@@ -4,17 +4,14 @@ import (
 	"log"
 	"os"
 
-	"github.com/DrIhor/test_task/internal/service/transport/gRPC"
+	gr "github.com/DrIhor/test_task/internal/service/transport/graphQL"
 )
 
 func init() {
 	os.Setenv("STORAGE_TYPE", "grpc")
-	os.Setenv("GRCP_PORT", "8080")
-	os.Setenv("GRCP_HOST", "")
+	os.Setenv("GRCP_ADDR", "localhost:8081")
 
-	os.Setenv("GRCP_ADDR", ":8081")
-
-	os.Setenv("STORAGE", "mongo")
+	os.Setenv("STORAGE", "postgres")
 	os.Setenv("SERVER_PORT", "8080")
 	os.Setenv("SERVER_HOST", "")
 
@@ -25,14 +22,11 @@ func init() {
 	os.Setenv("POSTGRE_PASS", "postgres")
 	os.Setenv("POSTGRE_DB", "postgres")
 
-	// mongo
-	os.Setenv("MONGO_ADDR", "localhost:27017/?readPreference=primary&ssl=false")
 }
 
 func main() {
-
 	// read config
-	server := gRPC.New()
+	server := gr.New()
 	if err := server.ServerAddrConfig(); err != nil {
 		log.Fatal("Can`t get config of server: ", err)
 	}

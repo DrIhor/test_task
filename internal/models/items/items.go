@@ -1,11 +1,11 @@
 package items
 
 type Item struct {
-	ID          int    `json:"id,omitempty" csv:"name"`
-	Name        string `json:"name,omitempty" csv:"name"`
-	Price       int32  `json:"price,omitempty" csv:"price"`
-	ItemsNumber int32  `json:"itemsNumber,omitempty" csv:"itemsNumber"`
-	Description string `json:"desc,omitempty" csv:"desc"`
+	ID          int    `bson:"_id" json:"id,omitempty" csv:"-,omitempty"`
+	Name        string `bson:"name,omitempty" json:"name,omitempty" csv:"name"`
+	Price       int32  `bson:"price,omitempty" json:"price,omitempty" csv:"price"`
+	ItemsNumber int32  `bson:"itemsNumber,omitempty" json:"itemsNumber,omitempty" csv:"itemsNumber"`
+	Description string `bson:"desc,omitempty" json:"desc,omitempty" csv:"desc"`
 }
 
 // all main services for Item to work with DB

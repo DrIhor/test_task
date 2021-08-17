@@ -8,10 +8,10 @@ import (
 )
 
 func init() {
-	os.Setenv("STORAGE_TYPE", "grpc")
+	os.Setenv("STORAGE_TYPE", "")
 	os.Setenv("GRCP_ADDR", "localhost:8081")
 
-	os.Setenv("STORAGE", "postgres")
+	os.Setenv("STORAGE", "mongo")
 	os.Setenv("SERVER_PORT", "8080")
 	os.Setenv("SERVER_HOST", "")
 
@@ -21,6 +21,9 @@ func init() {
 	os.Setenv("POSTGRE_USER", "postgres")
 	os.Setenv("POSTGRE_PASS", "postgres")
 	os.Setenv("POSTGRE_DB", "postgres")
+
+	// mongo
+	os.Setenv("MONGO_ADDR", "localhost:27017/?readPreference=primary&ssl=false")
 
 }
 

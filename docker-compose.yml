@@ -12,3 +12,14 @@ services:
             POSTGRES_USER: "postgres"
         ports: 
             - "5432:5432"
+
+    mongodb:
+        image : mongo
+        container_name: mongodb
+        environment:
+            - PUID=1000
+            - PGID=1000
+        volumes:
+            - /home/barry/mongodb/database:/data/db
+        ports:
+            - 27017:27017

@@ -10,6 +10,7 @@ import (
 	configs "github.com/DrIhor/test_task/internal/models/server"
 	"google.golang.org/grpc"
 
+	mg "github.com/DrIhor/test_task/internal/storage/mongo"
 	pb "github.com/DrIhor/test_task/pkg/grpc"
 
 	"github.com/DrIhor/test_task/internal/models/items"
@@ -55,8 +56,12 @@ func (s *Server) ConfigStorage() error {
 		fmt.Println("Start Postgres")
 		return nil
 
+	case "mongo":
+		stor := mg.New()
+		s.storage = stor
+		fmt.Println("Start Mongo")
+		return nil
 	}
-
 	return errors.New("No such storage")
 }
 

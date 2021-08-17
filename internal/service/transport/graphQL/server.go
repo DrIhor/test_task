@@ -1,4 +1,4 @@
-package httpServer
+package graphQL
 
 import (
 	"errors"
@@ -12,12 +12,8 @@ import (
 	configs "github.com/DrIhor/test_task/internal/models/server"
 	"github.com/DrIhor/test_task/internal/service/transport/graphQL/graph"
 	"github.com/DrIhor/test_task/internal/service/transport/graphQL/graph/generated"
-	routes "github.com/DrIhor/test_task/internal/service/transport/httpServer/routes"
-
 	"github.com/DrIhor/test_task/internal/storage/memory"
-	mg "github.com/DrIhor/test_task/internal/storage/mongo"
 	"github.com/DrIhor/test_task/internal/storage/postgres"
-
 	"github.com/gorilla/mux"
 )
 
@@ -61,29 +57,9 @@ func (s *Server) ConfigStorage() error {
 		fmt.Println("Start Postgres")
 		return nil
 
-	case "mongo":
-		stor := mg.New()
-		s.storage = stor
-		fmt.Println("Start Mongo")
-		return nil
 	}
+
 	return errors.New("No such storage")
-}
-
-/**
- * all routes of http server
- * also contain connection to graphql server
- */
-
-func (s *Server) GetRouters() {
-	itemsHandler := routes.New(s.router, s.storage)
-	itemsHandler.HandlerItems()
-}
-
-// work with graphql queries
-func (s *Server) AddGraohQLRoutes() {
-	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: graph.NewResolver(s.storage)}))
-	s.router.Handle("/query/", srv)
 }
 
 func (s *Server) getHttpAddress() string {
@@ -92,14 +68,12 @@ func (s *Server) getHttpAddress() string {
 
 func (s *Server) Start() error {
 	fmt.Println("Server is running on " + s.config.Host)
-	err := http.ListenAndServe(s.getHttpAddress(), routes.Middleware(s.router))
-	if err != nil {
-		return err
-	}
+
+	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: graph.NewResolver(s.storage)}))
+	http.Handle("/", srv)
 
 	server := &http.Server{
 		Addr:         s.getHttpAddress(),
-		Handler:      routes.Middleware(s.router),
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 5 * time.Second,
 	}

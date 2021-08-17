@@ -1,11 +1,13 @@
 package postgres
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	itemsModel "github.com/DrIhor/test_task/internal/models/items"
 	_ "github.com/lib/pq"
@@ -37,7 +39,15 @@ func New() *PostgreStorage {
 
 func (postgre *PostgreStorage) AddNewItem(newItem itemsModel.Item) (int, error) {
 	var newItemID int
-	err := postgre.db.QueryRow(
+
+	// add context to query
+	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
+	defer cancel()
+
+	// DB request
+	err := postgre.db.QueryRowContext(
+		ctx,
 		`INSERT INTO "items"(name, price, number, description) VALUES ($1, $2, $3, $4) RETURNING id`,
 		newItem.Name,
 		newItem.Price,
@@ -55,7 +65,13 @@ func (postgre *PostgreStorage) AddNewItem(newItem itemsModel.Item) (int, error) 
 func (postgre *PostgreStorage) GetAllItems() ([]byte, error) {
 	var itemsSlice []itemsModel.Item
 
-	rows, err := postgre.db.Query(`SELECT id, name, price, number, description FROM "items"`)
+	// add context to query
+	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
+	defer cancel()
+
+	// DB request
+	rows, err := postgre.db.QueryContext(ctx, `SELECT id, name, price, number, description FROM "items"`)
 	if err != nil {
 		return nil, err
 	}
@@ -79,7 +95,15 @@ func (postgre *PostgreStorage) GetAllItems() ([]byte, error) {
 
 func (postgre *PostgreStorage) GetItem(id int) ([]byte, error) {
 	var item itemsModel.Item
-	err := postgre.db.QueryRow(`SELECT name, price, number, description FROM "items" WHERE id=$1`, id).Scan(&item.Name, &item.Price, &item.ItemsNumber, &item.Description)
+
+	// add context to query
+	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
+	defer cancel()
+
+	err := postgre.db.QueryRowContext(
+		ctx,
+		`SELECT name, price, number, description FROM "items" WHERE id=$1`, id).Scan(&item.Name, &item.Price, &item.ItemsNumber, &item.Description)
 	if err != nil && err != sql.ErrNoRows {
 		return nil, err
 	}
@@ -93,7 +117,13 @@ func (postgre *PostgreStorage) GetItem(id int) ([]byte, error) {
 }
 
 func (postgre *PostgreStorage) DeleteItem(id int) (bool, error) {
-	res, err := postgre.db.Exec(
+
+	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
+	defer cancel()
+
+	res, err := postgre.db.ExecContext(
+		ctx,
 		`DELETE FROM "items" WHERE id=$1`,
 		id,
 	)
@@ -116,7 +146,12 @@ func (postgre *PostgreStorage) DeleteItem(id int) (bool, error) {
 func (postgre *PostgreStorage) UpdateItem(id int) ([]byte, error) {
 	var item itemsModel.Item
 
-	err := postgre.db.QueryRow(
+	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
+	defer cancel()
+
+	err := postgre.db.QueryRowContext(
+		ctx,
 		`UPDATE "items" SET number=number - 1 WHERE id=$1 RETURNING name, price, number, description`,
 		id,
 	).Scan(&item.Name, &item.Price, &item.ItemsNumber, &item.Description)
