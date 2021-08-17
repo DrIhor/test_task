@@ -159,6 +159,24 @@ func (postgre *PostgreStorage) UpdateItem(id int) ([]byte, error) {
 		return nil, err
 	}
 
+	if item.ItemsNumber < 0 {
+		res, err := postgre.db.ExecContext(
+			ctx,
+			`DELETE FROM "items" WHERE id=$1`,
+			id,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		_, err = res.RowsAffected()
+		if err != nil {
+			return nil, err
+		}
+
+		return nil, nil
+	}
+
 	// return result
 	res, err := json.Marshal(item)
 	if err != nil {

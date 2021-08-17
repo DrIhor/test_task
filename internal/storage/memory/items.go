@@ -17,11 +17,18 @@ func New() *DB {
 	}
 }
 
-func (db *DB) AddNewItem(newItem itemsModel.Item) (int, error) {
-	id := len(db.items) + 1
+// search not exist id to add to db
+// recommend add len of db items as first argument
+func (db *DB) getNewID(id int) int {
 	if _, ok := db.items[id]; ok {
-		return 0, errors.New("RowExist")
+		return db.getNewID(id + 1)
 	}
+
+	return id
+}
+
+func (db *DB) AddNewItem(newItem itemsModel.Item) (int, error) {
+	id := db.getNewID(len(db.items))
 
 	db.items[id] = newItem
 	return id, nil
@@ -70,9 +77,9 @@ func (db *DB) UpdateItem(id int) ([]byte, error) {
 		return nil, errors.New("NotExist")
 	}
 
-	if val.ItemsNumber-1 <= 0 {
+	if val.ItemsNumber-1 < 0 {
 		delete(db.items, id)
-		return nil, errors.New("WrongNumber")
+		return nil, nil
 	}
 
 	// save new value

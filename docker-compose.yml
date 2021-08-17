@@ -23,3 +23,9 @@ services:
             - /home/barry/mongodb/database:/data/db
         ports:
             - 27017:27017
+
+    redis:
+        image: redis
+        ports:
+            - 6379:6379
+ 

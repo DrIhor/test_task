@@ -155,6 +155,17 @@ func (mg *MongoStorage) UpdateItem(id int) ([]byte, error) {
 		return nil, err
 	}
 
+	if item.ItemsNumber <= 0 {
+		_, err := collection.DeleteOne(context.Background(), bson.M{
+			"_id": id,
+		})
+		if err != nil {
+			return nil, err
+		}
+
+		return nil, nil
+	}
+
 	res, err := json.Marshal(item)
 	if err != nil {
 		return nil, err

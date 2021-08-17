@@ -17,6 +17,7 @@ import (
 	"github.com/DrIhor/test_task/internal/storage/memory"
 	mg "github.com/DrIhor/test_task/internal/storage/mongo"
 	"github.com/DrIhor/test_task/internal/storage/postgres"
+	"github.com/DrIhor/test_task/internal/storage/redis"
 
 	"github.com/gorilla/mux"
 )
@@ -65,6 +66,12 @@ func (s *Server) ConfigStorage() error {
 		stor := mg.New()
 		s.storage = stor
 		fmt.Println("Start Mongo")
+		return nil
+
+	case "redis":
+		stor := redis.New()
+		s.storage = stor
+		fmt.Println("Start Redis")
 		return nil
 	}
 	return errors.New("No such storage")

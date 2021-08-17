@@ -12,7 +12,7 @@ func init() {
 	os.Setenv("STORAGE_TYPE", "")
 	os.Setenv("GRCP_ADDR", "localhost:8081")
 
-	os.Setenv("STORAGE", "mongo")
+	os.Setenv("STORAGE", "redis")
 	os.Setenv("SERVER_PORT", "8080")
 	os.Setenv("SERVER_HOST", "")
 
