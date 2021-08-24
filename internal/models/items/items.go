@@ -1,6 +1,9 @@
 package items
 
-import "encoding/json"
+import (
+	"context"
+	"encoding/json"
+)
 
 type Item struct {
 	ID          int    `bson:"_id" json:"id,omitempty" csv:"-,omitempty"`
@@ -16,9 +19,9 @@ func (i *Item) MarshalBinary() ([]byte, error) {
 
 // all main services for Item to work with DB
 type ItemStorageServices interface {
-	AddNewItem(Item) (int, error)
-	GetAllItems() ([]byte, error)
-	GetItem(int) ([]byte, error)
-	DeleteItem(int) (bool, error)
-	UpdateItem(int) ([]byte, error)
+	AddNewItem(context.Context, Item) (int, error)
+	GetAllItems(context.Context) ([]byte, error)
+	GetItem(context.Context, int) ([]byte, error)
+	DeleteItem(context.Context, int) (bool, error)
+	UpdateItem(context.Context, int) ([]byte, error)
 }

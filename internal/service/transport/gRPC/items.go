@@ -15,7 +15,7 @@ func (s *Server) AddNewItem(ctx context.Context, in *pb.Item) (*pb.ItemID, error
 		Description: in.Description,
 	}
 
-	id, err := s.storage.AddNewItem(item)
+	id, err := s.storage.AddNewItem(ctx, item)
 	if err != nil {
 		return nil, err
 	}
@@ -27,7 +27,7 @@ func (s *Server) AddNewItem(ctx context.Context, in *pb.Item) (*pb.ItemID, error
 
 func (s *Server) GetAllItems(ctx context.Context, in *pb.NoneObjectRequest) (*pb.EncodeItemResponse, error) {
 
-	res, err := s.storage.GetAllItems()
+	res, err := s.storage.GetAllItems(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -39,7 +39,7 @@ func (s *Server) GetAllItems(ctx context.Context, in *pb.NoneObjectRequest) (*pb
 
 func (s *Server) GetItem(ctx context.Context, in *pb.ItemID) (*pb.EncodeItemResponse, error) {
 
-	res, err := s.storage.GetItem(int(in.ID))
+	res, err := s.storage.GetItem(ctx, int(in.ID))
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +51,7 @@ func (s *Server) GetItem(ctx context.Context, in *pb.ItemID) (*pb.EncodeItemResp
 
 func (s *Server) DeleteItem(ctx context.Context, in *pb.ItemID) (*pb.NoneObjectResp, error) {
 
-	done, err := s.storage.DeleteItem(int(in.ID))
+	done, err := s.storage.DeleteItem(ctx, int(in.ID))
 	if err != nil {
 		return nil, err
 	}
@@ -63,7 +63,7 @@ func (s *Server) DeleteItem(ctx context.Context, in *pb.ItemID) (*pb.NoneObjectR
 
 func (s *Server) UpdateItem(ctx context.Context, in *pb.ItemID) (*pb.EncodeItemResponse, error) {
 
-	res, err := s.storage.UpdateItem(int(in.ID))
+	res, err := s.storage.UpdateItem(ctx, int(in.ID))
 	if err != nil {
 		return nil, err
 	}

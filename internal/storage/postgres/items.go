@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"time"
 
 	itemsModel "github.com/DrIhor/test_task/internal/models/items"
 	_ "github.com/lib/pq"
@@ -37,13 +36,8 @@ func New() *PostgreStorage {
 	return &PostgreStorage{db: conn}
 }
 
-func (postgre *PostgreStorage) AddNewItem(newItem itemsModel.Item) (int, error) {
+func (postgre *PostgreStorage) AddNewItem(ctx context.Context, newItem itemsModel.Item) (int, error) {
 	var newItemID int
-
-	// add context to query
-	ctx := context.Background()
-	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
-	defer cancel()
 
 	// DB request
 	err := postgre.db.QueryRowContext(
@@ -62,13 +56,8 @@ func (postgre *PostgreStorage) AddNewItem(newItem itemsModel.Item) (int, error) 
 	return newItemID, nil
 }
 
-func (postgre *PostgreStorage) GetAllItems() ([]byte, error) {
+func (postgre *PostgreStorage) GetAllItems(ctx context.Context) ([]byte, error) {
 	var itemsSlice []itemsModel.Item
-
-	// add context to query
-	ctx := context.Background()
-	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
-	defer cancel()
 
 	// DB request
 	rows, err := postgre.db.QueryContext(ctx, `SELECT id, name, price, number, description FROM "items"`)
@@ -93,13 +82,8 @@ func (postgre *PostgreStorage) GetAllItems() ([]byte, error) {
 	return res, nil
 }
 
-func (postgre *PostgreStorage) GetItem(id int) ([]byte, error) {
+func (postgre *PostgreStorage) GetItem(ctx context.Context, id int) ([]byte, error) {
 	var item itemsModel.Item
-
-	// add context to query
-	ctx := context.Background()
-	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
-	defer cancel()
 
 	err := postgre.db.QueryRowContext(
 		ctx,
@@ -116,11 +100,7 @@ func (postgre *PostgreStorage) GetItem(id int) ([]byte, error) {
 	return res, nil
 }
 
-func (postgre *PostgreStorage) DeleteItem(id int) (bool, error) {
-
-	ctx := context.Background()
-	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
-	defer cancel()
+func (postgre *PostgreStorage) DeleteItem(ctx context.Context, id int) (bool, error) {
 
 	res, err := postgre.db.ExecContext(
 		ctx,
@@ -143,12 +123,8 @@ func (postgre *PostgreStorage) DeleteItem(id int) (bool, error) {
 	return true, nil
 }
 
-func (postgre *PostgreStorage) UpdateItem(id int) ([]byte, error) {
+func (postgre *PostgreStorage) UpdateItem(ctx context.Context, id int) ([]byte, error) {
 	var item itemsModel.Item
-
-	ctx := context.Background()
-	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
-	defer cancel()
 
 	err := postgre.db.QueryRowContext(
 		ctx,

@@ -1,6 +1,7 @@
 package httpServer
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -14,6 +15,8 @@ import (
 	"github.com/DrIhor/test_task/internal/service/transport/graphQL/graph/generated"
 	routes "github.com/DrIhor/test_task/internal/service/transport/httpServer/routes"
 
+	elk "github.com/DrIhor/test_task/internal/storage/elk"
+
 	"github.com/DrIhor/test_task/internal/storage/memory"
 	mg "github.com/DrIhor/test_task/internal/storage/mongo"
 	"github.com/DrIhor/test_task/internal/storage/postgres"
@@ -23,6 +26,7 @@ import (
 )
 
 type Server struct {
+	ctx     context.Context
 	config  *configs.Config
 	router  *mux.Router
 	storage items.ItemStorageServices
@@ -31,6 +35,7 @@ type Server struct {
 func New() *Server {
 	return &Server{
 		router: mux.NewRouter(),
+		ctx:    context.Background(),
 	}
 }
 
@@ -73,6 +78,12 @@ func (s *Server) ConfigStorage() error {
 		s.storage = stor
 		fmt.Println("Start Redis")
 		return nil
+
+	case "elk":
+		stor := elk.New()
+		s.storage = stor
+		fmt.Println("Start ELK")
+		return nil
 	}
 	return errors.New("No such storage")
 }
@@ -83,7 +94,7 @@ func (s *Server) ConfigStorage() error {
  */
 
 func (s *Server) GetRouters() {
-	itemsHandler := routes.New(s.router, s.storage)
+	itemsHandler := routes.New(s.ctx, s.router, s.storage)
 	itemsHandler.HandlerItems()
 }
 

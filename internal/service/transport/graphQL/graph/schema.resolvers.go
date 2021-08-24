@@ -23,7 +23,7 @@ func (r *mutationResolver) AddItem(ctx context.Context, item model.Iteminput) (*
 		ItemsNumber: int32(item.ItemsNumber),
 		Description: *item.Desc,
 	}
-	id, err := r.services.AddNewItem(itm)
+	id, err := r.services.AddNewItem(ctx, itm)
 	if err != nil {
 		return nil, err
 	}
@@ -40,10 +40,10 @@ func (r *mutationResolver) UpdatePerson(ctx context.Context, id string) (*model.
 	var res []byte
 	switch os.Getenv("STORAGE_TYPE") {
 	case "":
-		res, errData = r.services.UpdateItem(personID)
+		res, errData = r.services.UpdateItem(ctx, personID)
 	case "grpc":
-		grpcConn := connectors.NewGRPC(os.Getenv("GRCP_ADDR"))
-		res, errData = grpcConn.UpdateItem(personID)
+		grpcConn := connectors.NewGRPC(ctx, os.Getenv("GRCP_ADDR"))
+		res, errData = grpcConn.UpdateItem(ctx, personID)
 	}
 
 	// check if struct is empty
@@ -77,10 +77,10 @@ func (r *mutationResolver) DeletePerson(ctx context.Context, id string) (*bool, 
 	var errData error
 	switch os.Getenv("STORAGE_TYPE") {
 	case "":
-		done, errData = r.services.DeleteItem(personID)
+		done, errData = r.services.DeleteItem(ctx, personID)
 	case "grpc":
-		grpcConn := connectors.NewGRPC(os.Getenv("GRCP_ADDR"))
-		done, errData = grpcConn.DeleteItem(personID)
+		grpcConn := connectors.NewGRPC(ctx, os.Getenv("GRCP_ADDR"))
+		done, errData = grpcConn.DeleteItem(ctx, personID)
 	}
 
 	return &done, errData
@@ -91,10 +91,10 @@ func (r *queryResolver) GetItems(ctx context.Context) ([]*model.Item, error) {
 	var res []byte
 	switch os.Getenv("STORAGE_TYPE") {
 	case "":
-		res, errData = r.services.GetAllItems()
+		res, errData = r.services.GetAllItems(ctx)
 	case "grpc":
-		grpcConn := connectors.NewGRPC(os.Getenv("GRCP_ADDR"))
-		res, errData = grpcConn.GetAllItems()
+		grpcConn := connectors.NewGRPC(ctx, os.Getenv("GRCP_ADDR"))
+		res, errData = grpcConn.GetAllItems(ctx)
 	}
 
 	if errData != nil {
@@ -120,10 +120,10 @@ func (r *queryResolver) GetItem(ctx context.Context, id string) (*model.Item, er
 	var res []byte
 	switch os.Getenv("STORAGE_TYPE") {
 	case "":
-		res, errData = r.services.UpdateItem(personID)
+		res, errData = r.services.UpdateItem(ctx, personID)
 	case "grpc":
-		grpcConn := connectors.NewGRPC(os.Getenv("GRCP_ADDR"))
-		res, errData = grpcConn.GetItem(personID)
+		grpcConn := connectors.NewGRPC(ctx, os.Getenv("GRCP_ADDR"))
+		res, errData = grpcConn.GetItem(ctx, personID)
 	}
 
 	if errData != nil {

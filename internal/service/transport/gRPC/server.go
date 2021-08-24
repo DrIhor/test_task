@@ -10,7 +10,9 @@ import (
 	configs "github.com/DrIhor/test_task/internal/models/server"
 	"google.golang.org/grpc"
 
+	"github.com/DrIhor/test_task/internal/storage/elk"
 	mg "github.com/DrIhor/test_task/internal/storage/mongo"
+	"github.com/DrIhor/test_task/internal/storage/redis"
 	pb "github.com/DrIhor/test_task/pkg/grpc"
 
 	"github.com/DrIhor/test_task/internal/models/items"
@@ -61,6 +63,19 @@ func (s *Server) ConfigStorage() error {
 		s.storage = stor
 		fmt.Println("Start Mongo")
 		return nil
+
+	case "redis":
+		stor := redis.New()
+		s.storage = stor
+		fmt.Println("Start Redis")
+		return nil
+
+	case "elk":
+		stor := elk.New()
+		s.storage = stor
+		fmt.Println("Start ELK")
+		return nil
+
 	}
 	return errors.New("No such storage")
 }

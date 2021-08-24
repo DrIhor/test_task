@@ -1,6 +1,7 @@
 package memory
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 
@@ -20,21 +21,21 @@ func New() *DB {
 // search not exist id to add to db
 // recommend add len of db items as first argument
 func (db *DB) getNewID(id int) int {
-	if _, ok := db.items[id]; ok {
+	if _, ok := db.items[id]; ok || id == 0 {
 		return db.getNewID(id + 1)
 	}
 
 	return id
 }
 
-func (db *DB) AddNewItem(newItem itemsModel.Item) (int, error) {
+func (db *DB) AddNewItem(ctx context.Context, newItem itemsModel.Item) (int, error) {
 	id := db.getNewID(len(db.items))
 
 	db.items[id] = newItem
 	return id, nil
 }
 
-func (db *DB) GetAllItems() ([]byte, error) {
+func (db *DB) GetAllItems(ctx context.Context) ([]byte, error) {
 	var itemsSlice []itemsModel.Item
 	for _, value := range db.items {
 		itemsSlice = append(itemsSlice, value)
@@ -49,7 +50,7 @@ func (db *DB) GetAllItems() ([]byte, error) {
 
 }
 
-func (db *DB) GetItem(id int) ([]byte, error) {
+func (db *DB) GetItem(ctx context.Context, id int) ([]byte, error) {
 	if _, ok := db.items[id]; !ok {
 		return nil, errors.New("NotExist")
 	}
@@ -62,7 +63,7 @@ func (db *DB) GetItem(id int) ([]byte, error) {
 	return res, nil
 }
 
-func (db *DB) DeleteItem(id int) (bool, error) {
+func (db *DB) DeleteItem(ctx context.Context, id int) (bool, error) {
 	if _, ok := db.items[id]; !ok {
 		return false, nil
 	}
@@ -71,7 +72,7 @@ func (db *DB) DeleteItem(id int) (bool, error) {
 	return true, nil
 }
 
-func (db *DB) UpdateItem(id int) ([]byte, error) {
+func (db *DB) UpdateItem(ctx context.Context, id int) ([]byte, error) {
 	val, ok := db.items[id]
 	if !ok {
 		return nil, errors.New("NotExist")

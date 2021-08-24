@@ -48,12 +48,8 @@ func New() *MongoStorage {
 	return &MongoStorage{db: client.Database("shop")}
 }
 
-func (mg *MongoStorage) AddNewItem(newItem itemsModel.Item) (int, error) {
+func (mg *MongoStorage) AddNewItem(ctx context.Context, newItem itemsModel.Item) (int, error) {
 	collection := mg.db.Collection("items")
-
-	ctx := context.Background()
-	ctx, cancel := context.WithTimeout(ctx, 1*time.Second)
-	defer cancel()
 
 	// check id of last record
 	var lastrecord itemsModel.Item
@@ -83,15 +79,15 @@ func (mg *MongoStorage) AddNewItem(newItem itemsModel.Item) (int, error) {
 	return id, nil
 }
 
-func (mg *MongoStorage) GetAllItems() ([]byte, error) {
+func (mg *MongoStorage) GetAllItems(ctx context.Context) ([]byte, error) {
 	collection := mg.db.Collection("items")
-	cur, err := collection.Find(context.Background(), bson.M{})
+	cur, err := collection.Find(ctx, bson.M{})
 	if err != nil {
 		return nil, err
 	}
 
 	var items []itemsModel.Item
-	if err := cur.All(context.Background(), &items); err != nil {
+	if err := cur.All(ctx, &items); err != nil {
 		return nil, err
 	}
 
@@ -103,11 +99,11 @@ func (mg *MongoStorage) GetAllItems() ([]byte, error) {
 	return res, nil
 }
 
-func (mg *MongoStorage) GetItem(id int) ([]byte, error) {
+func (mg *MongoStorage) GetItem(ctx context.Context, id int) ([]byte, error) {
 	collection := mg.db.Collection("items")
 
 	var item itemsModel.Item
-	err := collection.FindOne(context.Background(), bson.M{
+	err := collection.FindOne(ctx, bson.M{
 		"_id": id,
 	}).Decode(&item)
 	if err != nil && err != mongo.ErrNoDocuments {
@@ -122,10 +118,10 @@ func (mg *MongoStorage) GetItem(id int) ([]byte, error) {
 	return res, nil
 }
 
-func (mg *MongoStorage) DeleteItem(id int) (bool, error) {
+func (mg *MongoStorage) DeleteItem(ctx context.Context, id int) (bool, error) {
 	collection := mg.db.Collection("items")
 
-	res, err := collection.DeleteOne(context.Background(), bson.M{
+	res, err := collection.DeleteOne(ctx, bson.M{
 		"_id": id,
 	})
 	if err != nil {
@@ -140,11 +136,12 @@ func (mg *MongoStorage) DeleteItem(id int) (bool, error) {
 
 }
 
-func (mg *MongoStorage) UpdateItem(id int) ([]byte, error) {
+func (mg *MongoStorage) UpdateItem(ctx context.Context, id int) ([]byte, error) {
 	collection := mg.db.Collection("items")
 
 	var item itemsModel.Item
-	err := collection.FindOneAndUpdate(context.Background(),
+	err := collection.FindOneAndUpdate(
+		ctx,
 		bson.M{"_id": id},
 		bson.M{
 			"$inc": bson.M{
@@ -156,9 +153,11 @@ func (mg *MongoStorage) UpdateItem(id int) ([]byte, error) {
 	}
 
 	if item.ItemsNumber <= 0 {
-		_, err := collection.DeleteOne(context.Background(), bson.M{
-			"_id": id,
-		})
+		_, err := collection.DeleteOne(
+			ctx,
+			bson.M{
+				"_id": id,
+			})
 		if err != nil {
 			return nil, err
 		}

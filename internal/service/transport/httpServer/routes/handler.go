@@ -2,6 +2,7 @@ package routes
 
 import (
 	"bytes"
+	"context"
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
@@ -17,18 +18,19 @@ import (
 	msgServ "github.com/DrIhor/test_task/internal/service/messages"
 
 	"github.com/gorilla/mux"
-	"github.com/jszwec/csvutil"
 )
 
 type HandlerItemsServ struct {
 	router   *mux.Router
 	services *itemServ.ItemServices
+	ctx      context.Context
 }
 
-func New(router *mux.Router, stor itemModel.ItemStorageServices) *HandlerItemsServ {
+func New(ctx context.Context, router *mux.Router, stor itemModel.ItemStorageServices) *HandlerItemsServ {
 	return &HandlerItemsServ{
 		router:   router,
-		services: itemServ.New(stor),
+		services: itemServ.New(ctx, stor),
+		ctx:      ctx,
 	}
 }
 
@@ -55,8 +57,8 @@ func (h *HandlerItemsServ) ShowAllItems(w http.ResponseWriter, r *http.Request) 
 	case "":
 		res, errData = h.services.GetAllItems()
 	case "grpc":
-		grpcConn := connectors.NewGRPC(os.Getenv("GRCP_ADDR"))
-		res, errData = grpcConn.GetAllItems()
+		grpcConn := connectors.NewGRPC(h.ctx, os.Getenv("GRCP_ADDR"))
+		res, errData = grpcConn.GetAllItems(h.ctx)
 	}
 
 	if errData != nil {
@@ -88,8 +90,8 @@ func (h *HandlerItemsServ) ShowItem(w http.ResponseWriter, r *http.Request) {
 	case "":
 		res, errData = h.services.GetItem(id)
 	case "grpc":
-		grpcConn := connectors.NewGRPC(os.Getenv("GRCP_ADDR"))
-		res, errData = grpcConn.GetItem(id)
+		grpcConn := connectors.NewGRPC(h.ctx, os.Getenv("GRCP_ADDR"))
+		res, errData = grpcConn.GetItem(h.ctx, id)
 	}
 
 	if errData != nil {
@@ -127,8 +129,8 @@ func (h *HandlerItemsServ) AddNewItem(w http.ResponseWriter, r *http.Request) {
 	case "":
 		id, errData = h.services.AddNewItem(obj)
 	case "grpc":
-		grpcConn := connectors.NewGRPC(os.Getenv("GRCP_ADDR"))
-		id, errData = grpcConn.AddNewItem(obj)
+		grpcConn := connectors.NewGRPC(h.ctx, os.Getenv("GRCP_ADDR"))
+		id, errData = grpcConn.AddNewItem(h.ctx, obj)
 	}
 
 	if errData != nil {
@@ -173,8 +175,8 @@ func (h *HandlerItemsServ) BuyItems(w http.ResponseWriter, r *http.Request) {
 	case "":
 		res, errData = h.services.UpdateItem(id)
 	case "grpc":
-		grpcConn := connectors.NewGRPC(os.Getenv("GRCP_ADDR"))
-		res, errData = grpcConn.UpdateItem(id)
+		grpcConn := connectors.NewGRPC(h.ctx, os.Getenv("GRCP_ADDR"))
+		res, errData = grpcConn.UpdateItem(h.ctx, id)
 	}
 
 	// check if struct is empty
@@ -212,8 +214,8 @@ func (h *HandlerItemsServ) DeleteItem(w http.ResponseWriter, r *http.Request) {
 	case "":
 		done, errData = h.services.DeleteItem(id)
 	case "grpc":
-		grpcConn := connectors.NewGRPC(os.Getenv("GRCP_ADDR"))
-		done, errData = grpcConn.DeleteItem(id)
+		grpcConn := connectors.NewGRPC(h.ctx, os.Getenv("GRCP_ADDR"))
+		done, errData = grpcConn.DeleteItem(h.ctx, id)
 	}
 
 	if errData != nil {
@@ -247,57 +249,21 @@ func (h *HandlerItemsServ) AddDataFromCSV(w http.ResponseWriter, r *http.Request
 	// log some data
 	name := strings.Split(fileHeader.Filename, ".")
 	fmt.Printf("File name %s\n", name[0])
-	fmt.Printf("File type %v\n", fileHeader.Header)
+	fmt.Printf("File type %v\n", fileHeader.Header["Content-Type"][0])
 	fmt.Printf("File size %v\n", fileHeader.Size)
 
-	//
-	// start read file data
-	//
-	rd := csv.NewReader(file)
-	var (
-		itemHeader string        // struct fields
-		firstRow   bool   = true // if file header
-		newIDs     []int         // result data
-	)
+	contentType := fileHeader.Header["Content-Type"][0]
 
-	for {
-		row, err := rd.Read()
-		if err != nil {
-			if err == io.EOF {
-				break
-			}
-
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-
-		// init header
-		if firstRow {
-			itemHeader = strings.Join(row, ",") + "\n" // create single row for csvutil lib
-			firstRow = false
-			continue
-		}
-
-		csvIteam := []byte(itemHeader + strings.Join(row, ","))
-		var items []itemModel.Item
-		if err := csvutil.Unmarshal(csvIteam, &items); err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-
-		for _, item := range items {
-			if item != (itemModel.Item{}) {
-				id, err := h.services.AddNewItem(item)
-				if err != nil {
-					w.WriteHeader(http.StatusInternalServerError)
-					return
-				}
-				newIDs = append(newIDs, id)
-			}
-		}
+	var res []byte
+	switch contentType {
+	case "text/csv":
+		rd := csv.NewReader(file)
+		res, err = h.services.AddFromCSV(rd)
+	default:
+		w.WriteHeader(http.StatusBadRequest)
+		return
 	}
 
-	res, err := json.Marshal(newIDs)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -307,26 +273,17 @@ func (h *HandlerItemsServ) AddDataFromCSV(w http.ResponseWriter, r *http.Request
 }
 
 func (h *HandlerItemsServ) ReturnAllItemsCSV(w http.ResponseWriter, r *http.Request) {
-	byteData, err := h.services.GetAllItems()
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	var itemsSlice []itemModel.Item
-	if err := json.Unmarshal(byteData, &itemsSlice); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
 
-	b, err := csvutil.Marshal(itemsSlice)
+	res, err := h.services.GetAllItemsAsCSV()
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
+	// add some headers
 	w.Header().Set("Content-Disposition", "multipart/form-data; boundary=something;")
 	w.Header().Set("Content-Type", "text/csv")
 
-	io.Copy(w, bytes.NewReader(b))
+	io.Copy(w, bytes.NewReader(res))
 	return
 }

@@ -12,12 +12,11 @@ import (
 
 type GrpcConnector struct {
 	itemStor pb.ItemStorageClient
-
-	conn *grpc.ClientConn
+	conn     *grpc.ClientConn
 }
 
-func NewGRPC(address string) *GrpcConnector {
-	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+func NewGRPC(ctx context.Context, address string) *GrpcConnector {
+	ctx, _ = context.WithTimeout(ctx, 5*time.Second)
 
 	conn, err := grpc.DialContext(ctx, address, grpc.WithInsecure())
 	if err != nil {
@@ -30,7 +29,7 @@ func NewGRPC(address string) *GrpcConnector {
 	}
 }
 
-func (gr *GrpcConnector) AddNewItem(item items.Item) (int, error) {
+func (gr *GrpcConnector) AddNewItem(ctx context.Context, item items.Item) (int, error) {
 	reqItem := pb.Item{
 		Name:        item.Name,
 		Price:       item.Price,
@@ -38,15 +37,13 @@ func (gr *GrpcConnector) AddNewItem(item items.Item) (int, error) {
 		Description: item.Description,
 	}
 
-	res, err := gr.itemStor.AddNewItem(context.Background(), &reqItem)
-
-	time.Sleep(2 * time.Second)
+	res, err := gr.itemStor.AddNewItem(ctx, &reqItem)
 
 	return int(res.ID), err
 }
 
-func (gr *GrpcConnector) GetItem(id int) ([]byte, error) {
-	res, err := gr.itemStor.GetItem(context.Background(), &pb.ItemID{
+func (gr *GrpcConnector) GetItem(ctx context.Context, id int) ([]byte, error) {
+	res, err := gr.itemStor.GetItem(ctx, &pb.ItemID{
 		ID: int64(id),
 	})
 
@@ -57,15 +54,15 @@ func (gr *GrpcConnector) GetItem(id int) ([]byte, error) {
 	return res.Result, err
 }
 
-func (gr *GrpcConnector) DeleteItem(id int) (bool, error) {
-	res, err := gr.itemStor.DeleteItem(context.Background(), &pb.ItemID{
+func (gr *GrpcConnector) DeleteItem(ctx context.Context, id int) (bool, error) {
+	res, err := gr.itemStor.DeleteItem(ctx, &pb.ItemID{
 		ID: int64(id),
 	})
 	return res.DoneWork, err
 }
 
-func (gr *GrpcConnector) GetAllItems() ([]byte, error) {
-	res, err := gr.itemStor.GetAllItems(context.Background(), &pb.NoneObjectRequest{})
+func (gr *GrpcConnector) GetAllItems(ctx context.Context) ([]byte, error) {
+	res, err := gr.itemStor.GetAllItems(ctx, &pb.NoneObjectRequest{})
 	if err != nil {
 		return nil, err
 	}
@@ -73,8 +70,8 @@ func (gr *GrpcConnector) GetAllItems() ([]byte, error) {
 	return res.Result, err
 }
 
-func (gr *GrpcConnector) UpdateItem(id int) ([]byte, error) {
-	res, err := gr.itemStor.UpdateItem(context.Background(), &pb.ItemID{
+func (gr *GrpcConnector) UpdateItem(ctx context.Context, id int) ([]byte, error) {
+	res, err := gr.itemStor.UpdateItem(ctx, &pb.ItemID{
 		ID: int64(id),
 	})
 	if err != nil {
