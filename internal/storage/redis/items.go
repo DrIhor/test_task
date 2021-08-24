@@ -5,10 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"strconv"
 
 	itemsModel "github.com/DrIhor/test_task/internal/models/items"
 	redis "github.com/go-redis/redis/v8"
+	"github.com/google/uuid"
 )
 
 type RedisStorage struct {
@@ -32,42 +32,38 @@ func New() *RedisStorage {
 	return &RedisStorage{client: rdb}
 }
 
-// search not exist id to add to db
-// recommend add len of db items as first argument
-func (db *RedisStorage) getNewID(ctx context.Context, id int) (int, error) {
-	_, err := db.client.Get(ctx, strconv.Itoa(id)).Result()
-	switch {
-	case err == redis.Nil:
-		return id, nil
-	case err != nil:
-		return 0, err
-	}
+// // search not exist id to add to db
+// // recommend add len of db items as first argument
+// func (db *RedisStorage) getNewID(ctx context.Context, id int) (int, error) {
+// 	_, err := db.client.Get(ctx, strconv.Itoa(id)).Result()
+// 	switch {
+// 	case err == redis.Nil:
+// 		return id, nil
+// 	case err != nil:
+// 		return 0, err
+// 	}
 
-	return db.getNewID(ctx, id+1)
-}
+// 	return db.getNewID(ctx, id+1)
+// }
 
-func (db *RedisStorage) AddNewItem(ctx context.Context, newItem itemsModel.Item) (int, error) {
-	lastID, err := db.client.DBSize(ctx).Result()
+func (db *RedisStorage) AddNewItem(ctx context.Context, newItem itemsModel.Item) (string, error) {
+	// lastID, err := db.client.DBSize(ctx).Result()
+	// if err != nil {
+	// 	if err != redis.Nil {
+	// 		return "", err
+	// 	}
+
+	// 	lastID = 0 // start init if not exist
+	// }
+
+	newID := uuid.New()
+
+	_, err := db.client.Set(ctx, newID.String(), &newItem, 0).Result()
 	if err != nil {
-		if err != redis.Nil {
-			return 0, err
-		}
-
-		lastID = 0 // start init if not exist
+		return "", err
 	}
 
-	id := int(lastID) + 1 // use
-
-	newID, err := db.getNewID(ctx, id)
-	if err != nil {
-		return 0, err
-	}
-	_, err = db.client.Set(ctx, strconv.Itoa(newID), &newItem, 0).Result()
-	if err != nil {
-		return 0, err
-	}
-
-	return newID, nil
+	return newID.String(), nil
 }
 
 func (db *RedisStorage) GetAllItems(ctx context.Context) ([]byte, error) {
@@ -87,11 +83,7 @@ func (db *RedisStorage) GetAllItems(ctx context.Context) ([]byte, error) {
 		}
 
 		// add id to result
-		id, err := strconv.Atoi(iter.Val())
-		if err != nil {
-			return nil, err
-		}
-		item.ID = id
+		item.ID = iter.Val()
 
 		itemsSlice = append(itemsSlice, item)
 	}
@@ -108,8 +100,8 @@ func (db *RedisStorage) GetAllItems(ctx context.Context) ([]byte, error) {
 
 }
 
-func (db *RedisStorage) GetItem(ctx context.Context, id int) ([]byte, error) {
-	res, err := db.client.Get(ctx, strconv.Itoa(id)).Bytes()
+func (db *RedisStorage) GetItem(ctx context.Context, id string) ([]byte, error) {
+	res, err := db.client.Get(ctx, id).Bytes()
 	if err != nil {
 		if err == redis.Nil {
 			return nil, nil
@@ -121,8 +113,8 @@ func (db *RedisStorage) GetItem(ctx context.Context, id int) ([]byte, error) {
 	return res, nil
 }
 
-func (db *RedisStorage) DeleteItem(ctx context.Context, id int) (bool, error) {
-	rows, err := db.client.Del(ctx, strconv.Itoa(id)).Result()
+func (db *RedisStorage) DeleteItem(ctx context.Context, id string) (bool, error) {
+	rows, err := db.client.Del(ctx, id).Result()
 	if err != nil {
 		if err == redis.Nil {
 			return false, nil
@@ -138,8 +130,8 @@ func (db *RedisStorage) DeleteItem(ctx context.Context, id int) (bool, error) {
 	return true, nil
 }
 
-func (db *RedisStorage) UpdateItem(ctx context.Context, id int) ([]byte, error) {
-	foundItem, err := db.client.Get(ctx, strconv.Itoa(id)).Bytes()
+func (db *RedisStorage) UpdateItem(ctx context.Context, id string) ([]byte, error) {
+	foundItem, err := db.client.Get(ctx, id).Bytes()
 	if err != nil {
 		if err == redis.Nil {
 			return nil, nil
@@ -156,7 +148,7 @@ func (db *RedisStorage) UpdateItem(ctx context.Context, id int) ([]byte, error) 
 	// update value count
 	item.ItemsNumber--
 	if item.ItemsNumber < 0 {
-		_, err := db.client.Del(ctx, strconv.Itoa(id)).Result()
+		_, err := db.client.Del(ctx, id).Result()
 		if err != nil {
 			if err == redis.Nil {
 				return nil, nil
@@ -169,7 +161,7 @@ func (db *RedisStorage) UpdateItem(ctx context.Context, id int) ([]byte, error) 
 
 	}
 
-	_, err = db.client.Set(ctx, strconv.Itoa(id), &item, 0).Result()
+	_, err = db.client.Set(ctx, id, &item, 0).Result()
 	if err != nil {
 		return nil, err
 	}

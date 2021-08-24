@@ -17,7 +17,7 @@ func init() {
 	os.Setenv("GRCP_ADDR", ":8081")
 
 	// grpc
-	os.Setenv("STORAGE", "elk")
+	os.Setenv("STORAGE", "postgres")
 	os.Setenv("SERVER_PORT", "8080")
 	os.Setenv("SERVER_HOST", "")
 

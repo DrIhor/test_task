@@ -6,33 +6,35 @@ import (
 	"errors"
 
 	itemsModel "github.com/DrIhor/test_task/internal/models/items"
+	"github.com/google/uuid"
 )
 
 type DB struct {
-	items map[int]itemsModel.Item
+	items map[uuid.UUID]itemsModel.Item
 }
 
 func New() *DB {
 	return &DB{
-		items: make(map[int]itemsModel.Item),
+		items: make(map[uuid.UUID]itemsModel.Item),
 	}
 }
 
 // search not exist id to add to db
 // recommend add len of db items as first argument
-func (db *DB) getNewID(id int) int {
-	if _, ok := db.items[id]; ok || id == 0 {
-		return db.getNewID(id + 1)
+func (db *DB) getNewID(id uuid.UUID) uuid.UUID {
+
+	if _, ok := db.items[id]; ok {
+		return db.getNewID(uuid.New())
 	}
 
 	return id
 }
 
-func (db *DB) AddNewItem(ctx context.Context, newItem itemsModel.Item) (int, error) {
-	id := db.getNewID(len(db.items))
+func (db *DB) AddNewItem(ctx context.Context, newItem itemsModel.Item) (string, error) {
+	id := db.getNewID(uuid.New())
 
 	db.items[id] = newItem
-	return id, nil
+	return id.String(), nil
 }
 
 func (db *DB) GetAllItems(ctx context.Context) ([]byte, error) {
@@ -50,12 +52,17 @@ func (db *DB) GetAllItems(ctx context.Context) ([]byte, error) {
 
 }
 
-func (db *DB) GetItem(ctx context.Context, id int) ([]byte, error) {
-	if _, ok := db.items[id]; !ok {
+func (db *DB) GetItem(ctx context.Context, id string) ([]byte, error) {
+	uid, err := uuid.Parse(id)
+	if err != nil {
+		return nil, err
+	}
+
+	if _, ok := db.items[uid]; !ok {
 		return nil, errors.New("NotExist")
 	}
 
-	res, err := json.Marshal(db.items[id])
+	res, err := json.Marshal(db.items[uid])
 	if err != nil {
 		return nil, err
 	}
@@ -63,29 +70,39 @@ func (db *DB) GetItem(ctx context.Context, id int) ([]byte, error) {
 	return res, nil
 }
 
-func (db *DB) DeleteItem(ctx context.Context, id int) (bool, error) {
-	if _, ok := db.items[id]; !ok {
+func (db *DB) DeleteItem(ctx context.Context, id string) (bool, error) {
+	uid, err := uuid.Parse(id)
+	if err != nil {
+		return false, err
+	}
+
+	if _, ok := db.items[uid]; !ok {
 		return false, nil
 	}
 
-	delete(db.items, id)
+	delete(db.items, uid)
 	return true, nil
 }
 
-func (db *DB) UpdateItem(ctx context.Context, id int) ([]byte, error) {
-	val, ok := db.items[id]
+func (db *DB) UpdateItem(ctx context.Context, id string) ([]byte, error) {
+	uid, err := uuid.Parse(id)
+	if err != nil {
+		return nil, err
+	}
+
+	val, ok := db.items[uid]
 	if !ok {
 		return nil, errors.New("NotExist")
 	}
 
 	if val.ItemsNumber-1 < 0 {
-		delete(db.items, id)
+		delete(db.items, uid)
 		return nil, nil
 	}
 
 	// save new value
 	val.ItemsNumber--
-	db.items[id] = val
+	db.items[uid] = val
 
 	// return result
 	res, err := json.Marshal(val)

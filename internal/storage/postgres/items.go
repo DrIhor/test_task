@@ -9,6 +9,7 @@ import (
 	"os"
 
 	itemsModel "github.com/DrIhor/test_task/internal/models/items"
+	"github.com/google/uuid"
 	_ "github.com/lib/pq"
 )
 
@@ -36,13 +37,14 @@ func New() *PostgreStorage {
 	return &PostgreStorage{db: conn}
 }
 
-func (postgre *PostgreStorage) AddNewItem(ctx context.Context, newItem itemsModel.Item) (int, error) {
-	var newItemID int
+func (postgre *PostgreStorage) AddNewItem(ctx context.Context, newItem itemsModel.Item) (string, error) {
+	var newItemID string
 
 	// DB request
 	err := postgre.db.QueryRowContext(
 		ctx,
-		`INSERT INTO "items"(name, price, number, description) VALUES ($1, $2, $3, $4) RETURNING id`,
+		`INSERT INTO "items"(id, name, price, number, description) VALUES ($1, $2, $3, $4, $5) RETURNING id`,
+		uuid.New().String(),
 		newItem.Name,
 		newItem.Price,
 		newItem.ItemsNumber,
@@ -50,7 +52,7 @@ func (postgre *PostgreStorage) AddNewItem(ctx context.Context, newItem itemsMode
 	).Scan(&newItemID)
 
 	if err != nil {
-		return 0, err
+		return "", err
 	}
 
 	return newItemID, nil
@@ -82,7 +84,7 @@ func (postgre *PostgreStorage) GetAllItems(ctx context.Context) ([]byte, error) 
 	return res, nil
 }
 
-func (postgre *PostgreStorage) GetItem(ctx context.Context, id int) ([]byte, error) {
+func (postgre *PostgreStorage) GetItem(ctx context.Context, id string) ([]byte, error) {
 	var item itemsModel.Item
 
 	err := postgre.db.QueryRowContext(
@@ -100,7 +102,7 @@ func (postgre *PostgreStorage) GetItem(ctx context.Context, id int) ([]byte, err
 	return res, nil
 }
 
-func (postgre *PostgreStorage) DeleteItem(ctx context.Context, id int) (bool, error) {
+func (postgre *PostgreStorage) DeleteItem(ctx context.Context, id string) (bool, error) {
 
 	res, err := postgre.db.ExecContext(
 		ctx,
@@ -123,7 +125,7 @@ func (postgre *PostgreStorage) DeleteItem(ctx context.Context, id int) (bool, er
 	return true, nil
 }
 
-func (postgre *PostgreStorage) UpdateItem(ctx context.Context, id int) ([]byte, error) {
+func (postgre *PostgreStorage) UpdateItem(ctx context.Context, id string) ([]byte, error) {
 	var item itemsModel.Item
 
 	err := postgre.db.QueryRowContext(

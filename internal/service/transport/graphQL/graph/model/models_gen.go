@@ -3,7 +3,7 @@
 package model
 
 type Item struct {
-	ID          *int    `json:"id"`
+	ID          *string `json:"id"`
 	Name        string  `json:"name"`
 	Price       int     `json:"price"`
 	ItemsNumber int     `json:"itemsNumber"`

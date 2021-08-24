@@ -29,7 +29,7 @@ func NewGRPC(ctx context.Context, address string) *GrpcConnector {
 	}
 }
 
-func (gr *GrpcConnector) AddNewItem(ctx context.Context, item items.Item) (int, error) {
+func (gr *GrpcConnector) AddNewItem(ctx context.Context, item items.Item) (string, error) {
 	reqItem := pb.Item{
 		Name:        item.Name,
 		Price:       item.Price,
@@ -39,12 +39,12 @@ func (gr *GrpcConnector) AddNewItem(ctx context.Context, item items.Item) (int, 
 
 	res, err := gr.itemStor.AddNewItem(ctx, &reqItem)
 
-	return int(res.ID), err
+	return res.ID, err
 }
 
-func (gr *GrpcConnector) GetItem(ctx context.Context, id int) ([]byte, error) {
+func (gr *GrpcConnector) GetItem(ctx context.Context, id string) ([]byte, error) {
 	res, err := gr.itemStor.GetItem(ctx, &pb.ItemID{
-		ID: int64(id),
+		ID: id,
 	})
 
 	if err != nil {
@@ -54,9 +54,9 @@ func (gr *GrpcConnector) GetItem(ctx context.Context, id int) ([]byte, error) {
 	return res.Result, err
 }
 
-func (gr *GrpcConnector) DeleteItem(ctx context.Context, id int) (bool, error) {
+func (gr *GrpcConnector) DeleteItem(ctx context.Context, id string) (bool, error) {
 	res, err := gr.itemStor.DeleteItem(ctx, &pb.ItemID{
-		ID: int64(id),
+		ID: id,
 	})
 	return res.DoneWork, err
 }
@@ -70,9 +70,9 @@ func (gr *GrpcConnector) GetAllItems(ctx context.Context) ([]byte, error) {
 	return res.Result, err
 }
 
-func (gr *GrpcConnector) UpdateItem(ctx context.Context, id int) ([]byte, error) {
+func (gr *GrpcConnector) UpdateItem(ctx context.Context, id string) ([]byte, error) {
 	res, err := gr.itemStor.UpdateItem(ctx, &pb.ItemID{
-		ID: int64(id),
+		ID: id,
 	})
 	if err != nil {
 		return nil, err

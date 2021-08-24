@@ -6,11 +6,11 @@ import (
 	"encoding/json"
 	"log"
 	"os"
-	"strconv"
 
 	itemsModel "github.com/DrIhor/test_task/internal/models/items"
 	elasticsearch "github.com/elastic/go-elasticsearch/v7"
 	"github.com/elastic/go-elasticsearch/v7/esapi"
+	"github.com/google/uuid"
 )
 
 const indexItems string = "items" // must be lower case
@@ -41,67 +41,28 @@ func New() *ElkStorage {
 	return &ElkStorage{client: es}
 }
 
-// search not exist id to add to db
-// recommend add len of db items as first argument
-func (db *ElkStorage) getNewID(ctx context.Context, id int) (int, error) {
-	req := esapi.GetRequest{
-		Index:      indexItems,
-		DocumentID: strconv.Itoa(id),
-	}
-
-	resp, err := req.Do(ctx, db.client)
-	if err != nil {
-		return 0, err
-	}
-
-	if resp.StatusCode == 404 {
-		return id, nil
-	}
-
-	return db.getNewID(ctx, id+1)
-}
-
-func (db *ElkStorage) AddNewItem(ctx context.Context, newItem itemsModel.Item) (int, error) {
+func (db *ElkStorage) AddNewItem(ctx context.Context, newItem itemsModel.Item) (string, error) {
 	data, err := json.Marshal(newItem)
 	if err != nil {
-		return 0, err
-	}
-
-	// get count of items
-	countReq := esapi.CountRequest{
-		Index: []string{indexItems},
-	}
-
-	countInfo := make(map[string]int)
-	resp, err := countReq.Do(ctx, db.client)
-	if err != nil {
-		return 0, err
-	}
-
-	if err := json.NewDecoder(resp.Body).Decode(&countInfo); err != nil {
-		return 0, err
+		return "", err
 	}
 
 	// check id vill be valid
-	newInfoID := countInfo["count"] + 1
-	newID, err := db.getNewID(ctx, newInfoID)
-	if err != nil {
-		return 0, err
-	}
+	newID := uuid.New()
 
 	// add new item
 	req := esapi.CreateRequest{
 		Index:      indexItems,
-		DocumentID: strconv.Itoa(newID),
+		DocumentID: newID.String(),
 		Body:       bytes.NewReader(data),
 	}
 
 	_, err = req.Do(ctx, db.client)
 	if err != nil {
-		return 0, err
+		return "", err
 	}
 
-	return newInfoID, nil
+	return newID.String(), nil
 }
 
 func (db *ElkStorage) GetAllItems(ctx context.Context) ([]byte, error) {
@@ -134,10 +95,11 @@ func (db *ElkStorage) GetAllItems(ctx context.Context) ([]byte, error) {
 	return res, nil
 }
 
-func (db *ElkStorage) GetItem(ctx context.Context, id int) ([]byte, error) {
+func (db *ElkStorage) GetItem(ctx context.Context, id string) ([]byte, error) {
+
 	req := esapi.GetRequest{
 		Index:      indexItems,
-		DocumentID: strconv.Itoa(id),
+		DocumentID: id,
 	}
 
 	resp, err := req.Do(ctx, db.client)
@@ -163,10 +125,11 @@ func (db *ElkStorage) GetItem(ctx context.Context, id int) ([]byte, error) {
 	return res, nil
 }
 
-func (db *ElkStorage) DeleteItem(ctx context.Context, id int) (bool, error) {
+func (db *ElkStorage) DeleteItem(ctx context.Context, id string) (bool, error) {
+
 	req := esapi.DeleteRequest{
 		Index:      indexItems,
-		DocumentID: strconv.Itoa(id),
+		DocumentID: id,
 	}
 
 	resp, err := req.Do(ctx, db.client)
@@ -190,15 +153,20 @@ func (db *ElkStorage) createUpdateItemsNumberQuery() ([]byte, error) {
 	return json.Marshal(query)
 }
 
-func (db *ElkStorage) UpdateItem(ctx context.Context, id int) ([]byte, error) {
+func (db *ElkStorage) UpdateItem(ctx context.Context, id string) ([]byte, error) {
 	query, err := db.createUpdateItemsNumberQuery()
+	if err != nil {
+		return nil, err
+	}
+
+	uid, err := uuid.Parse(id)
 	if err != nil {
 		return nil, err
 	}
 
 	req := esapi.UpdateRequest{
 		Index:      indexItems,
-		DocumentID: strconv.Itoa(id),
+		DocumentID: uid.String(),
 
 		Body: bytes.NewReader(query),
 	}
@@ -208,5 +176,5 @@ func (db *ElkStorage) UpdateItem(ctx context.Context, id int) ([]byte, error) {
 		return nil, err
 	}
 
-	return db.GetItem(ctx, id)
+	return db.GetItem(ctx, uid.String())
 }

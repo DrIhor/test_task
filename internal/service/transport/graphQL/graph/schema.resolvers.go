@@ -8,15 +8,15 @@ import (
 	"encoding/json"
 	"errors"
 	"os"
-	"strconv"
 
 	itemModel "github.com/DrIhor/test_task/internal/models/items"
 	"github.com/DrIhor/test_task/internal/service/connectors"
 	"github.com/DrIhor/test_task/internal/service/transport/graphQL/graph/generated"
 	"github.com/DrIhor/test_task/internal/service/transport/graphQL/graph/model"
+	"github.com/google/uuid"
 )
 
-func (r *mutationResolver) AddItem(ctx context.Context, item model.Iteminput) (*int, error) {
+func (r *mutationResolver) AddItem(ctx context.Context, item model.Iteminput) (*string, error) {
 	itm := itemModel.Item{
 		Name:        item.Name,
 		Price:       int32(item.Price),
@@ -31,19 +31,15 @@ func (r *mutationResolver) AddItem(ctx context.Context, item model.Iteminput) (*
 }
 
 func (r *mutationResolver) UpdatePerson(ctx context.Context, id string) (*model.Item, error) {
-	personID, err := strconv.Atoi(id)
-	if err != nil {
-		return nil, err
-	}
 
 	var errData error
 	var res []byte
 	switch os.Getenv("STORAGE_TYPE") {
 	case "":
-		res, errData = r.services.UpdateItem(ctx, personID)
+		res, errData = r.services.UpdateItem(ctx, id)
 	case "grpc":
 		grpcConn := connectors.NewGRPC(ctx, os.Getenv("GRCP_ADDR"))
-		res, errData = grpcConn.UpdateItem(ctx, personID)
+		res, errData = grpcConn.UpdateItem(ctx, id)
 	}
 
 	// check if struct is empty
@@ -56,19 +52,19 @@ func (r *mutationResolver) UpdatePerson(ctx context.Context, id string) (*model.
 	}
 
 	var resultItem model.Item
-	err = json.Unmarshal(res, &resultItem)
+	err := json.Unmarshal(res, &resultItem)
 	if err != nil {
 		return nil, err
 	}
 
 	// add id of person
-	resultItem.ID = &personID
+	resultItem.ID = &id
 
 	return &resultItem, nil
 }
 
 func (r *mutationResolver) DeletePerson(ctx context.Context, id string) (*bool, error) {
-	personID, err := strconv.Atoi(id)
+	_, err := uuid.Parse(id)
 	if err != nil {
 		return nil, err
 	}
@@ -77,10 +73,10 @@ func (r *mutationResolver) DeletePerson(ctx context.Context, id string) (*bool, 
 	var errData error
 	switch os.Getenv("STORAGE_TYPE") {
 	case "":
-		done, errData = r.services.DeleteItem(ctx, personID)
+		done, errData = r.services.DeleteItem(ctx, id)
 	case "grpc":
 		grpcConn := connectors.NewGRPC(ctx, os.Getenv("GRCP_ADDR"))
-		done, errData = grpcConn.DeleteItem(ctx, personID)
+		done, errData = grpcConn.DeleteItem(ctx, id)
 	}
 
 	return &done, errData
@@ -111,7 +107,7 @@ func (r *queryResolver) GetItems(ctx context.Context) ([]*model.Item, error) {
 }
 
 func (r *queryResolver) GetItem(ctx context.Context, id string) (*model.Item, error) {
-	personID, err := strconv.Atoi(id)
+	_, err := uuid.Parse(id)
 	if err != nil {
 		return nil, err
 	}
@@ -120,10 +116,10 @@ func (r *queryResolver) GetItem(ctx context.Context, id string) (*model.Item, er
 	var res []byte
 	switch os.Getenv("STORAGE_TYPE") {
 	case "":
-		res, errData = r.services.UpdateItem(ctx, personID)
+		res, errData = r.services.UpdateItem(ctx, id)
 	case "grpc":
 		grpcConn := connectors.NewGRPC(ctx, os.Getenv("GRCP_ADDR"))
-		res, errData = grpcConn.GetItem(ctx, personID)
+		res, errData = grpcConn.GetItem(ctx, id)
 	}
 
 	if errData != nil {
@@ -136,7 +132,7 @@ func (r *queryResolver) GetItem(ctx context.Context, id string) (*model.Item, er
 		return nil, err
 	}
 
-	resultData.ID = &personID
+	resultData.ID = &id
 
 	return &resultData, nil
 }

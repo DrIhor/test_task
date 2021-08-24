@@ -6,11 +6,11 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strconv"
 	"time"
 
 	itemsModel "github.com/DrIhor/test_task/internal/models/items"
 
+	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -48,35 +48,29 @@ func New() *MongoStorage {
 	return &MongoStorage{db: client.Database("shop")}
 }
 
-func (mg *MongoStorage) AddNewItem(ctx context.Context, newItem itemsModel.Item) (int, error) {
+func (mg *MongoStorage) AddNewItem(ctx context.Context, newItem itemsModel.Item) (string, error) {
 	collection := mg.db.Collection("items")
 
-	// check id of last record
-	var lastrecord itemsModel.Item
-	opts := options.FindOne().SetSort(bson.M{"$natural": -1})
-	if err := collection.FindOne(ctx, bson.M{}, opts).Decode(&lastrecord); err != nil {
-		if err != mongo.ErrNoDocuments {
-			return 0, err
-		}
-
-		lastrecord.ID = 0
-	}
+	// // check id of last record
+	// var lastrecord itemsModel.Item
+	// opts := options.FindOne().SetSort(bson.M{"$natural": -1})
+	// if err := collection.FindOne(ctx, bson.M{}, opts).Decode(&lastrecord); err != nil {
+	// 	if err != mongo.ErrNoDocuments {
+	// 		return 0, err
+	// 	}
+	// }
 
 	// set new id
-	newItem.ID = lastrecord.ID + 1
+	newItem.ID = uuid.New().String()
 
 	res, err := collection.InsertOne(ctx, newItem)
 	if err != nil {
-		return 0, err
+		return "", err
 	}
 
 	strID := fmt.Sprintf("%v", res.InsertedID)
-	id, err := strconv.Atoi(strID)
-	if err != nil {
-		return 0, err
-	}
 
-	return id, nil
+	return strID, nil
 }
 
 func (mg *MongoStorage) GetAllItems(ctx context.Context) ([]byte, error) {
@@ -99,7 +93,7 @@ func (mg *MongoStorage) GetAllItems(ctx context.Context) ([]byte, error) {
 	return res, nil
 }
 
-func (mg *MongoStorage) GetItem(ctx context.Context, id int) ([]byte, error) {
+func (mg *MongoStorage) GetItem(ctx context.Context, id string) ([]byte, error) {
 	collection := mg.db.Collection("items")
 
 	var item itemsModel.Item
@@ -118,7 +112,7 @@ func (mg *MongoStorage) GetItem(ctx context.Context, id int) ([]byte, error) {
 	return res, nil
 }
 
-func (mg *MongoStorage) DeleteItem(ctx context.Context, id int) (bool, error) {
+func (mg *MongoStorage) DeleteItem(ctx context.Context, id string) (bool, error) {
 	collection := mg.db.Collection("items")
 
 	res, err := collection.DeleteOne(ctx, bson.M{
@@ -136,7 +130,7 @@ func (mg *MongoStorage) DeleteItem(ctx context.Context, id int) (bool, error) {
 
 }
 
-func (mg *MongoStorage) UpdateItem(ctx context.Context, id int) ([]byte, error) {
+func (mg *MongoStorage) UpdateItem(ctx context.Context, id string) ([]byte, error) {
 	collection := mg.db.Collection("items")
 
 	var item itemsModel.Item

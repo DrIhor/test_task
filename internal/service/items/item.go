@@ -24,7 +24,7 @@ func New(ctx context.Context, stor itemModel.ItemStorageServices) *ItemServices 
 	}
 }
 
-func (itemSrv *ItemServices) AddNewItem(item items.Item) (int, error) {
+func (itemSrv *ItemServices) AddNewItem(item items.Item) (string, error) {
 	return itemSrv.storage.AddNewItem(itemSrv.ctx, item)
 }
 
@@ -32,23 +32,23 @@ func (itemSrv *ItemServices) GetAllItems() ([]byte, error) {
 	return itemSrv.storage.GetAllItems(itemSrv.ctx)
 }
 
-func (itemSrv *ItemServices) GetItem(id int) ([]byte, error) {
+func (itemSrv *ItemServices) GetItem(id string) ([]byte, error) {
 	return itemSrv.storage.GetItem(itemSrv.ctx, id)
 }
 
-func (itemSrv *ItemServices) DeleteItem(id int) (bool, error) {
+func (itemSrv *ItemServices) DeleteItem(id string) (bool, error) {
 	return itemSrv.storage.DeleteItem(itemSrv.ctx, id)
 }
 
-func (itemSrv *ItemServices) UpdateItem(id int) ([]byte, error) {
+func (itemSrv *ItemServices) UpdateItem(id string) ([]byte, error) {
 	return itemSrv.storage.UpdateItem(itemSrv.ctx, id)
 }
 
 func (itemSrv *ItemServices) AddFromCSV(rd *csv.Reader) ([]byte, error) {
 	var (
-		itemHeader string        // struct fields
-		firstRow   bool   = true // if file header
-		newIDs     []int         // result data
+		itemHeader string          // struct fields
+		firstRow   bool     = true // if file header
+		newIDs     []string        // result data
 	)
 
 	for {

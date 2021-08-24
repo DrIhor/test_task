@@ -9,13 +9,13 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"strconv"
 	"strings"
 
 	itemModel "github.com/DrIhor/test_task/internal/models/items"
 	"github.com/DrIhor/test_task/internal/service/connectors"
 	itemServ "github.com/DrIhor/test_task/internal/service/items"
 	msgServ "github.com/DrIhor/test_task/internal/service/messages"
+	"github.com/google/uuid"
 
 	"github.com/gorilla/mux"
 )
@@ -78,7 +78,9 @@ func (h *HandlerItemsServ) ShowItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, err := strconv.Atoi(keys[0])
+	id := keys[0]
+
+	_, err := uuid.Parse(id)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
@@ -123,7 +125,7 @@ func (h *HandlerItemsServ) AddNewItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var id int
+	var id string
 	var errData error
 	switch os.Getenv("STORAGE_TYPE") {
 	case "":
@@ -163,7 +165,8 @@ func (h *HandlerItemsServ) BuyItems(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, err := strconv.Atoi(keys[0])
+	id := keys[0]
+	_, err := uuid.Parse(id)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
@@ -202,7 +205,9 @@ func (h *HandlerItemsServ) DeleteItem(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	id, err := strconv.Atoi(keys[0])
+
+	id := keys[0]
+	_, err := uuid.Parse(id)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
@@ -263,6 +268,7 @@ func (h *HandlerItemsServ) AddDataFromCSV(w http.ResponseWriter, r *http.Request
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
+	fmt.Println(err)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

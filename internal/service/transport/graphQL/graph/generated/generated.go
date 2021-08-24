@@ -63,7 +63,7 @@ type ComplexityRoot struct {
 }
 
 type MutationResolver interface {
-	AddItem(ctx context.Context, item model.Iteminput) (*int, error)
+	AddItem(ctx context.Context, item model.Iteminput) (*string, error)
 	UpdatePerson(ctx context.Context, id string) (*model.Item, error)
 	DeletePerson(ctx context.Context, id string) (*bool, error)
 }
@@ -247,7 +247,7 @@ var sources = []*ast.Source{
 }
 
 type Item {
-    id: Int
+    id: String
     name: String!
     price: Int!
     itemsNumber: Int!
@@ -260,7 +260,7 @@ type Query {
 }
 
 type Mutation {
-    addItem(item: Iteminput!): Int
+    addItem(item: Iteminput!): String
     updatePerson(id: ID!): Item
     deletePerson(id: ID!): Boolean
 }
@@ -418,9 +418,9 @@ func (ec *executionContext) _Item_id(ctx context.Context, field graphql.Collecte
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*int)
+	res := resTmp.(*string)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Item_name(ctx context.Context, field graphql.CollectedField, obj *model.Item) (ret graphql.Marshaler) {
@@ -594,9 +594,9 @@ func (ec *executionContext) _Mutation_addItem(ctx context.Context, field graphql
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*int)
+	res := resTmp.(*string)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_updatePerson(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -2715,21 +2715,6 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 		return graphql.Null
 	}
 	return graphql.MarshalBoolean(*v)
-}
-
-func (ec *executionContext) unmarshalOInt2ᚖint(ctx context.Context, v interface{}) (*int, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := graphql.UnmarshalInt(v)
-	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.SelectionSet, v *int) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return graphql.MarshalInt(*v)
 }
 
 func (ec *executionContext) marshalOItem2ᚕᚖgithubᚗcomᚋDrIhorᚋtest_taskᚋinternalᚋserviceᚋtransportᚋgraphQLᚋgraphᚋmodelᚐItem(ctx context.Context, sel ast.SelectionSet, v []*model.Item) graphql.Marshaler {
