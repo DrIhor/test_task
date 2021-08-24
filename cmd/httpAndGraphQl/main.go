@@ -9,10 +9,15 @@ import (
 
 func init() {
 
-	os.Setenv("STORAGE_TYPE", "")
-	os.Setenv("GRCP_ADDR", "localhost:8081")
+	os.Setenv("STORAGE_TYPE", "grpc")
 
-	os.Setenv("STORAGE", "redis")
+	// grpc
+	os.Setenv("GRCP_PORT", "8080")
+	os.Setenv("GRCP_HOST", "")
+	os.Setenv("GRCP_ADDR", ":8081")
+
+	// grpc
+	os.Setenv("STORAGE", "elk")
 	os.Setenv("SERVER_PORT", "8080")
 	os.Setenv("SERVER_HOST", "")
 
@@ -25,6 +30,12 @@ func init() {
 
 	// mongo
 	os.Setenv("MONGO_ADDR", "localhost:27017/?readPreference=primary&ssl=false")
+
+	// elk
+	os.Setenv("ELASTIC_ADDR", "http://localhost:9200")
+	os.Setenv("ELASTIC_USER", "")
+	os.Setenv("ELASTIC_PASSWORD", "")
+
 }
 
 func main() {
