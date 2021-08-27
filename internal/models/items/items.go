@@ -12,10 +12,6 @@ type Item struct {
 	Description string `bson:"desc,omitempty" json:"desc,omitempty" csv:"desc"`
 }
 
-// func (i *Item) MarshalBinary() ([]byte, error) {
-// 	return json.Marshal(i)
-// }
-
 // all main services for Item to work with DB
 type ItemStorageServices interface {
 	AddNewItem(context.Context, Item) (string, error)

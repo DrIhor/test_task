@@ -32,30 +32,7 @@ func New() *RedisStorage {
 	return &RedisStorage{client: rdb}
 }
 
-// // search not exist id to add to db
-// // recommend add len of db items as first argument
-// func (db *RedisStorage) getNewID(ctx context.Context, id int) (int, error) {
-// 	_, err := db.client.Get(ctx, strconv.Itoa(id)).Result()
-// 	switch {
-// 	case err == redis.Nil:
-// 		return id, nil
-// 	case err != nil:
-// 		return 0, err
-// 	}
-
-// 	return db.getNewID(ctx, id+1)
-// }
-
 func (db *RedisStorage) AddNewItem(ctx context.Context, newItem itemsModel.Item) (string, error) {
-	// lastID, err := db.client.DBSize(ctx).Result()
-	// if err != nil {
-	// 	if err != redis.Nil {
-	// 		return "", err
-	// 	}
-
-	// 	lastID = 0 // start init if not exist
-	// }
-
 	newID := uuid.New()
 
 	_, err := db.client.Set(ctx, newID.String(), &newItem, 0).Result()

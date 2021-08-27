@@ -9,7 +9,7 @@ import (
 
 func init() {
 
-	os.Setenv("STORAGE_TYPE", "grpc")
+	os.Setenv("STORAGE_TYPE", "")
 
 	// grpc
 	os.Setenv("GRCP_PORT", "8080")

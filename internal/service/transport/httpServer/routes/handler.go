@@ -22,7 +22,7 @@ import (
 
 type HandlerItemsServ struct {
 	router   *mux.Router
-	services *itemServ.ItemServices
+	services itemServ.ItemSrv
 	ctx      context.Context
 }
 

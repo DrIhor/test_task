@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -38,6 +39,9 @@ func New() *PostgreStorage {
 }
 
 func (postgre *PostgreStorage) AddNewItem(ctx context.Context, newItem itemsModel.Item) (string, error) {
+	if newItem == (itemsModel.Item{}) {
+		return "", errors.New("Wrong data")
+	}
 	var newItemID string
 
 	// DB request
