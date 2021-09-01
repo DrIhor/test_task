@@ -3,7 +3,8 @@ package memory
 import (
 	"context"
 	"encoding/json"
-	"errors"
+
+	er "github.com/DrIhor/test_task/internal/errors"
 
 	itemsModel "github.com/DrIhor/test_task/internal/models/items"
 	"github.com/google/uuid"
@@ -59,7 +60,7 @@ func (db *DB) GetItem(ctx context.Context, id string) ([]byte, error) {
 	}
 
 	if _, ok := db.items[uid]; !ok {
-		return nil, errors.New("NotExist")
+		return nil, er.DataNotExist
 	}
 
 	res, err := json.Marshal(db.items[uid])
@@ -92,7 +93,7 @@ func (db *DB) UpdateItem(ctx context.Context, id string) ([]byte, error) {
 
 	val, ok := db.items[uid]
 	if !ok {
-		return nil, errors.New("NotExist")
+		return nil, er.DataNotExist
 	}
 
 	if val.ItemsNumber-1 < 0 {

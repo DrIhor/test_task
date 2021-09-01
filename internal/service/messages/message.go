@@ -2,17 +2,15 @@ package messages
 
 import (
 	"encoding/json"
-
-	messageModel "github.com/DrIhor/test_task/internal/models/messages"
 )
 
-func CreateMsgResp(message string) []byte {
+func NewMessage() *responce {
+	return &responce{}
+}
 
-	dataResp := messageModel.Responce{
-		Msg: message,
-	}
+func (ms *responce) CreateMsgResp(message string) ([]byte, error) {
 
-	res, _ := json.Marshal(dataResp)
-	return res
+	ms.Msg = message
 
+	return json.Marshal(ms)
 }

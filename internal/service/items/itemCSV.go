@@ -1,6 +1,7 @@
 package items
 
 import (
+	"context"
 	"encoding/csv"
 	"encoding/json"
 	"io"
@@ -11,11 +12,11 @@ import (
 )
 
 type ItemCSVServ interface {
-	AddFromCSV(rd *csv.Reader) ([]byte, error)
-	GetAllItemsAsCSV() ([]byte, error)
+	AddFromCSV(context.Context, *csv.Reader) ([]byte, error)
+	GetAllItemsAsCSV(context.Context) ([]byte, error)
 }
 
-func (itemSrv *ItemServices) AddFromCSV(rd *csv.Reader) ([]byte, error) {
+func (itemSrv *ItemServices) AddFromCSV(ctx context.Context, rd *csv.Reader) ([]byte, error) {
 	var (
 		itemHeader string          // struct fields
 		firstRow   bool     = true // if file header
@@ -47,7 +48,7 @@ func (itemSrv *ItemServices) AddFromCSV(rd *csv.Reader) ([]byte, error) {
 
 		for _, item := range items {
 			if item != (itemModel.Item{}) {
-				id, err := itemSrv.AddNewItem(item)
+				id, err := itemSrv.AddNewItem(ctx, item)
 				if err != nil {
 					return nil, err
 				}
@@ -64,8 +65,8 @@ func (itemSrv *ItemServices) AddFromCSV(rd *csv.Reader) ([]byte, error) {
 	return res, nil
 }
 
-func (itemSrv *ItemServices) GetAllItemsAsCSV() ([]byte, error) {
-	byteData, err := itemSrv.GetAllItems()
+func (itemSrv *ItemServices) GetAllItemsAsCSV(ctx context.Context) ([]byte, error) {
+	byteData, err := itemSrv.GetAllItems(ctx)
 	if err != nil {
 		return nil, err
 	}

@@ -2,27 +2,28 @@ package httpServer
 
 import (
 	"context"
-	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/DrIhor/test_task/internal/models/items"
 	configs "github.com/DrIhor/test_task/internal/models/server"
-	"github.com/DrIhor/test_task/internal/service/transport/graphQL/graph"
-	"github.com/DrIhor/test_task/internal/service/transport/graphQL/graph/generated"
-	routes "github.com/DrIhor/test_task/internal/service/transport/httpServer/routes"
-
-	elk "github.com/DrIhor/test_task/internal/storage/elk"
-
+	"github.com/DrIhor/test_task/internal/storage/elk"
 	"github.com/DrIhor/test_task/internal/storage/memory"
-	mg "github.com/DrIhor/test_task/internal/storage/mongo"
 	"github.com/DrIhor/test_task/internal/storage/postgres"
 	"github.com/DrIhor/test_task/internal/storage/redis"
-
+	"github.com/DrIhor/test_task/internal/transport/graphQL/graph"
+	"github.com/DrIhor/test_task/internal/transport/graphQL/graph/generated"
+	"github.com/DrIhor/test_task/internal/transport/httpServer/routes"
 	"github.com/gorilla/mux"
+
+	er "github.com/DrIhor/test_task/internal/errors"
+
+	mg "github.com/DrIhor/test_task/internal/storage/mongo"
 )
 
 type Server struct {
@@ -32,17 +33,17 @@ type Server struct {
 	storage items.ItemStorageServices
 }
 
-func New() *Server {
+func New(ctx context.Context) *Server {
 	return &Server{
 		router: mux.NewRouter(),
-		ctx:    context.Background(),
+		ctx:    ctx,
 	}
 }
 
 func (s *Server) ServerAddrConfig() error {
 	port := os.Getenv("SERVER_PORT")
 	if port == "" {
-		return errors.New("Wrong port")
+		return er.WrongPort
 	}
 
 	s.config = &configs.Config{
@@ -62,30 +63,47 @@ func (s *Server) ConfigStorage() error {
 		return nil
 
 	case "postgres":
-		stor := postgres.New()
-		s.storage = stor
+		pg, err := postgres.New()
+		if err != nil {
+			return err
+		}
+
+		s.storage = pg
 		fmt.Println("Start Postgres")
 		return nil
 
 	case "mongo":
-		stor := mg.New()
-		s.storage = stor
+		mong, err := mg.New()
+		if err != nil {
+			return err
+		}
+
+		s.storage = mong
 		fmt.Println("Start Mongo")
 		return nil
 
 	case "redis":
-		stor := redis.New()
+		rd, err := redis.New()
+		if err != nil {
+			return err
+		}
+
+		stor := rd
 		s.storage = stor
 		fmt.Println("Start Redis")
 		return nil
 
 	case "elk":
-		stor := elk.New()
-		s.storage = stor
+		el, err := elk.New()
+		if err != nil {
+			return err
+		}
+
+		s.storage = el
 		fmt.Println("Start ELK")
 		return nil
 	}
-	return errors.New("No such storage")
+	return er.NoSuchStorage
 }
 
 /**
@@ -108,19 +126,37 @@ func (s *Server) getHttpAddress() string {
 	return fmt.Sprintf("%s:%s", s.config.Host, s.config.Port)
 }
 
-func (s *Server) Start() error {
-	fmt.Println("Server is running on " + s.config.Host)
-	err := http.ListenAndServe(s.getHttpAddress(), routes.Middleware(s.router))
-	if err != nil {
-		return err
-	}
-
+func (s *Server) Start(ctx context.Context) error {
 	server := &http.Server{
 		Addr:         s.getHttpAddress(),
 		Handler:      routes.Middleware(s.router),
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 5 * time.Second,
 	}
+	cancelTimeout, errTimeout := strconv.Atoi(os.Getenv("Server_Cancel_Timeout"))
+	if errTimeout != nil {
+		return errTimeout
+	}
 
-	return server.ListenAndServe()
+	go func() {
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatal(err)
+		}
+	}()
+
+	fmt.Println("Server is running on: " + s.getHttpAddress())
+
+	<-ctx.Done()
+	log.Println("Server stopped")
+
+	ctxShutDown, cancel := context.WithTimeout(context.Background(), time.Duration(cancelTimeout)*time.Second)
+	defer cancel()
+
+	if err := server.Shutdown(ctxShutDown); err != nil {
+		return err
+	}
+
+	log.Printf("Server exited properly")
+
+	return nil
 }

@@ -4,9 +4,10 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
-	"errors"
 	"fmt"
-	"log"
+
+	er "github.com/DrIhor/test_task/internal/errors"
+
 	"os"
 
 	itemsModel "github.com/DrIhor/test_task/internal/models/items"
@@ -22,25 +23,25 @@ func getDBConnURL() string {
 	return fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", os.Getenv("POSTGRE_HOST"), os.Getenv("POSTGRE_PORT"), os.Getenv("POSTGRE_USER"), os.Getenv("POSTGRE_PASS"), os.Getenv("POSTGRE_DB"))
 }
 
-func New() *PostgreStorage {
+func New() (*PostgreStorage, error) {
 	postgreURL := getDBConnURL()
 
 	conn, err := sql.Open("postgres", postgreURL)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	if err := conn.Ping(); err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	fmt.Println("DB connected")
 
-	return &PostgreStorage{db: conn}
+	return &PostgreStorage{db: conn}, nil
 }
 
 func (postgre *PostgreStorage) AddNewItem(ctx context.Context, newItem itemsModel.Item) (string, error) {
 	if newItem == (itemsModel.Item{}) {
-		return "", errors.New("Wrong data")
+		return "", er.WrongInputData
 	}
 	var newItemID string
 

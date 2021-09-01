@@ -11,7 +11,7 @@ import (
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
-	"github.com/DrIhor/test_task/internal/service/transport/graphQL/graph/model"
+	"github.com/DrIhor/test_task/internal/transport/graphQL/graph/model"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
 )
@@ -284,7 +284,7 @@ func (ec *executionContext) field_Mutation_addItem_args(ctx context.Context, raw
 	var arg0 model.Iteminput
 	if tmp, ok := rawArgs["item"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("item"))
-		arg0, err = ec.unmarshalNIteminput2githubᚗcomᚋDrIhorᚋtest_taskᚋinternalᚋserviceᚋtransportᚋgraphQLᚋgraphᚋmodelᚐIteminput(ctx, tmp)
+		arg0, err = ec.unmarshalNIteminput2githubᚗcomᚋDrIhorᚋtest_taskᚋinternalᚋtransportᚋgraphQLᚋgraphᚋmodelᚐIteminput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -635,7 +635,7 @@ func (ec *executionContext) _Mutation_updatePerson(ctx context.Context, field gr
 	}
 	res := resTmp.(*model.Item)
 	fc.Result = res
-	return ec.marshalOItem2ᚖgithubᚗcomᚋDrIhorᚋtest_taskᚋinternalᚋserviceᚋtransportᚋgraphQLᚋgraphᚋmodelᚐItem(ctx, field.Selections, res)
+	return ec.marshalOItem2ᚖgithubᚗcomᚋDrIhorᚋtest_taskᚋinternalᚋtransportᚋgraphQLᚋgraphᚋmodelᚐItem(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_deletePerson(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -706,7 +706,7 @@ func (ec *executionContext) _Query_getItems(ctx context.Context, field graphql.C
 	}
 	res := resTmp.([]*model.Item)
 	fc.Result = res
-	return ec.marshalOItem2ᚕᚖgithubᚗcomᚋDrIhorᚋtest_taskᚋinternalᚋserviceᚋtransportᚋgraphQLᚋgraphᚋmodelᚐItem(ctx, field.Selections, res)
+	return ec.marshalOItem2ᚕᚖgithubᚗcomᚋDrIhorᚋtest_taskᚋinternalᚋtransportᚋgraphQLᚋgraphᚋmodelᚐItem(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_getItem(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -745,7 +745,7 @@ func (ec *executionContext) _Query_getItem(ctx context.Context, field graphql.Co
 	}
 	res := resTmp.(*model.Item)
 	fc.Result = res
-	return ec.marshalOItem2ᚖgithubᚗcomᚋDrIhorᚋtest_taskᚋinternalᚋserviceᚋtransportᚋgraphQLᚋgraphᚋmodelᚐItem(ctx, field.Selections, res)
+	return ec.marshalOItem2ᚖgithubᚗcomᚋDrIhorᚋtest_taskᚋinternalᚋtransportᚋgraphQLᚋgraphᚋmodelᚐItem(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -2416,7 +2416,7 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 	return res
 }
 
-func (ec *executionContext) unmarshalNIteminput2githubᚗcomᚋDrIhorᚋtest_taskᚋinternalᚋserviceᚋtransportᚋgraphQLᚋgraphᚋmodelᚐIteminput(ctx context.Context, v interface{}) (model.Iteminput, error) {
+func (ec *executionContext) unmarshalNIteminput2githubᚗcomᚋDrIhorᚋtest_taskᚋinternalᚋtransportᚋgraphQLᚋgraphᚋmodelᚐIteminput(ctx context.Context, v interface{}) (model.Iteminput, error) {
 	res, err := ec.unmarshalInputIteminput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
@@ -2717,7 +2717,7 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	return graphql.MarshalBoolean(*v)
 }
 
-func (ec *executionContext) marshalOItem2ᚕᚖgithubᚗcomᚋDrIhorᚋtest_taskᚋinternalᚋserviceᚋtransportᚋgraphQLᚋgraphᚋmodelᚐItem(ctx context.Context, sel ast.SelectionSet, v []*model.Item) graphql.Marshaler {
+func (ec *executionContext) marshalOItem2ᚕᚖgithubᚗcomᚋDrIhorᚋtest_taskᚋinternalᚋtransportᚋgraphQLᚋgraphᚋmodelᚐItem(ctx context.Context, sel ast.SelectionSet, v []*model.Item) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -2744,7 +2744,7 @@ func (ec *executionContext) marshalOItem2ᚕᚖgithubᚗcomᚋDrIhorᚋtest_task
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalOItem2ᚖgithubᚗcomᚋDrIhorᚋtest_taskᚋinternalᚋserviceᚋtransportᚋgraphQLᚋgraphᚋmodelᚐItem(ctx, sel, v[i])
+			ret[i] = ec.marshalOItem2ᚖgithubᚗcomᚋDrIhorᚋtest_taskᚋinternalᚋtransportᚋgraphQLᚋgraphᚋmodelᚐItem(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -2758,7 +2758,7 @@ func (ec *executionContext) marshalOItem2ᚕᚖgithubᚗcomᚋDrIhorᚋtest_task
 	return ret
 }
 
-func (ec *executionContext) marshalOItem2ᚖgithubᚗcomᚋDrIhorᚋtest_taskᚋinternalᚋserviceᚋtransportᚋgraphQLᚋgraphᚋmodelᚐItem(ctx context.Context, sel ast.SelectionSet, v *model.Item) graphql.Marshaler {
+func (ec *executionContext) marshalOItem2ᚖgithubᚗcomᚋDrIhorᚋtest_taskᚋinternalᚋtransportᚋgraphQLᚋgraphᚋmodelᚐItem(ctx context.Context, sel ast.SelectionSet, v *model.Item) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}

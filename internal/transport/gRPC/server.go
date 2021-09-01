@@ -1,7 +1,7 @@
 package gRPC
 
 import (
-	"errors"
+	"context"
 	"fmt"
 	"log"
 	"net"
@@ -9,6 +9,8 @@ import (
 
 	configs "github.com/DrIhor/test_task/internal/models/server"
 	"google.golang.org/grpc"
+
+	er "github.com/DrIhor/test_task/internal/errors"
 
 	"github.com/DrIhor/test_task/internal/storage/elk"
 	mg "github.com/DrIhor/test_task/internal/storage/mongo"
@@ -33,7 +35,7 @@ func New() *Server {
 func (s *Server) ServerAddrConfig() error {
 	port := os.Getenv("GRCP_PORT")
 	if port == "" {
-		return errors.New("Wrong port")
+		return er.WrongPort
 	}
 
 	s.config = &configs.Config{
@@ -53,34 +55,51 @@ func (s *Server) ConfigStorage() error {
 		return nil
 
 	case "postgres":
-		stor := postgres.New()
-		s.storage = stor
+		pg, err := postgres.New()
+		if err != nil {
+			return err
+		}
+
+		s.storage = pg
 		fmt.Println("Start Postgres")
 		return nil
 
 	case "mongo":
-		stor := mg.New()
-		s.storage = stor
+		mong, err := mg.New()
+		if err != nil {
+			return err
+		}
+
+		s.storage = mong
 		fmt.Println("Start Mongo")
 		return nil
 
 	case "redis":
-		stor := redis.New()
+		rd, err := redis.New()
+		if err != nil {
+			return err
+		}
+
+		stor := rd
 		s.storage = stor
 		fmt.Println("Start Redis")
 		return nil
 
 	case "elk":
-		stor := elk.New()
-		s.storage = stor
+		el, err := elk.New()
+		if err != nil {
+			return err
+		}
+
+		s.storage = el
 		fmt.Println("Start ELK")
 		return nil
-
 	}
-	return errors.New("No such storage")
+
+	return er.NoSuchStorage
 }
 
-func (s *Server) Start() error {
+func (s *Server) Start(ctx context.Context) error {
 	lis, err := net.Listen("tcp", os.Getenv("GRCP_ADDR"))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
@@ -89,9 +108,22 @@ func (s *Server) Start() error {
 	opts := []grpc.ServerOption{}
 	sr := grpc.NewServer(opts...)
 	pb.RegisterItemStorageServer(sr, s)
-	if err := sr.Serve(lis); err != nil {
-		log.Fatalf("failed to serve: %v", err)
-	}
+
+	// shutdown
+	go func() {
+		if err := sr.Serve(lis); err != nil {
+			log.Fatalf("failed to serve: %v", err)
+		}
+	}()
+
+	fmt.Println("GRCP is running")
+
+	<-ctx.Done()
+	log.Println("Server stopped")
+
+	sr.GracefulStop()
+
+	log.Printf("Server exited properly")
 
 	return nil
 }

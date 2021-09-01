@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"log"
 	"os"
 
 	itemsModel "github.com/DrIhor/test_task/internal/models/items"
@@ -27,18 +26,18 @@ func getElkConfig() *elasticsearch.Config {
 	}
 }
 
-func New() *ElkStorage {
+func New() (*ElkStorage, error) {
 	conf := getElkConfig()
 	es, err := elasticsearch.NewClient(*conf)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	if _, err = es.Info(); err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
-	return &ElkStorage{client: es}
+	return &ElkStorage{client: es}, nil
 }
 
 func (db *ElkStorage) AddNewItem(ctx context.Context, newItem itemsModel.Item) (string, error) {

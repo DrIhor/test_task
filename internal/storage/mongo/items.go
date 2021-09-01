@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"os"
 	"time"
 
@@ -25,40 +24,31 @@ func getDBConnURL() string {
 	return fmt.Sprintf("mongodb://%s", os.Getenv("MONGO_ADDR"))
 }
 
-func New() *MongoStorage {
+func New() (*MongoStorage, error) {
 	mongoURL := getDBConnURL()
 
 	client, err := mongo.NewClient(options.Client().ApplyURI(mongoURL))
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 
 	err = client.Connect(ctx)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	if err := client.Ping(ctx, readpref.Primary()); err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	fmt.Println("MongoDB connected")
 
-	return &MongoStorage{db: client.Database("shop")}
+	return &MongoStorage{db: client.Database("shop")}, err
 }
 
 func (mg *MongoStorage) AddNewItem(ctx context.Context, newItem itemsModel.Item) (string, error) {
 	collection := mg.db.Collection("items")
-
-	// // check id of last record
-	// var lastrecord itemsModel.Item
-	// opts := options.FindOne().SetSort(bson.M{"$natural": -1})
-	// if err := collection.FindOne(ctx, bson.M{}, opts).Decode(&lastrecord); err != nil {
-	// 	if err != mongo.ErrNoDocuments {
-	// 		return 0, err
-	// 	}
-	// }
 
 	// set new id
 	newItem.ID = uuid.New().String()

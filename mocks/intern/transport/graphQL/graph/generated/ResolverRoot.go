@@ -3,7 +3,7 @@
 package mocks
 
 import (
-	generated "github.com/DrIhor/test_task/internal/service/transport/graphQL/graph/generated"
+	generated "github.com/DrIhor/test_task/internal/transport/graphQL/graph/generated"
 	mock "github.com/stretchr/testify/mock"
 )
 

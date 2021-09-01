@@ -1,14 +1,16 @@
 package main
 
 import (
+	"context"
 	"log"
 	"os"
+	"os/signal"
 
-	"github.com/DrIhor/test_task/internal/service/transport/httpServer"
+	"github.com/DrIhor/test_task/internal/transport/httpServer"
 )
 
 func init() {
-
+	os.Setenv("Server_Cancel_Timeout", "5")
 	os.Setenv("STORAGE_TYPE", "")
 
 	// grpc
@@ -39,8 +41,14 @@ func init() {
 }
 
 func main() {
+
+	// init data
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+	ctx := context.Background()
+
 	// read config
-	server := httpServer.New()
+	server := httpServer.New(ctx)
 	if err := server.ServerAddrConfig(); err != nil {
 		log.Fatal("Can`t get config of server: ", err)
 	}
@@ -50,7 +58,16 @@ func main() {
 
 	server.GetRouters()
 	server.AddGraohQLRoutes()
-	if err := server.Start(); err != nil {
+
+	// create shutdown
+	ctx, cancel := context.WithCancel(context.Background())
+	go func() {
+		oscall := <-c
+		log.Printf("system call:%+v", oscall)
+		cancel()
+	}()
+
+	if err := server.Start(ctx); err != nil {
 		log.Fatal("Problems with server run: ", err)
 	}
 }

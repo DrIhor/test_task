@@ -11,8 +11,8 @@ import (
 
 	itemModel "github.com/DrIhor/test_task/internal/models/items"
 	"github.com/DrIhor/test_task/internal/service/connectors"
-	"github.com/DrIhor/test_task/internal/service/transport/graphQL/graph/generated"
-	"github.com/DrIhor/test_task/internal/service/transport/graphQL/graph/model"
+	"github.com/DrIhor/test_task/internal/transport/graphQL/graph/generated"
+	"github.com/DrIhor/test_task/internal/transport/graphQL/graph/model"
 	"github.com/google/uuid"
 )
 
@@ -38,7 +38,11 @@ func (r *mutationResolver) UpdatePerson(ctx context.Context, id string) (*model.
 	case "":
 		res, errData = r.services.UpdateItem(ctx, id)
 	case "grpc":
-		grpcConn := connectors.NewGRPC(ctx, os.Getenv("GRCP_ADDR"))
+		grpcConn, errConn := connectors.NewGRPC(ctx, os.Getenv("GRCP_ADDR"))
+		if errConn != nil {
+			return nil, errConn
+		}
+
 		res, errData = grpcConn.UpdateItem(ctx, id)
 	}
 
@@ -75,7 +79,11 @@ func (r *mutationResolver) DeletePerson(ctx context.Context, id string) (*bool, 
 	case "":
 		done, errData = r.services.DeleteItem(ctx, id)
 	case "grpc":
-		grpcConn := connectors.NewGRPC(ctx, os.Getenv("GRCP_ADDR"))
+		grpcConn, errConn := connectors.NewGRPC(ctx, os.Getenv("GRCP_ADDR"))
+		if errConn != nil {
+			return nil, errConn
+		}
+
 		done, errData = grpcConn.DeleteItem(ctx, id)
 	}
 
@@ -89,7 +97,10 @@ func (r *queryResolver) GetItems(ctx context.Context) ([]*model.Item, error) {
 	case "":
 		res, errData = r.services.GetAllItems(ctx)
 	case "grpc":
-		grpcConn := connectors.NewGRPC(ctx, os.Getenv("GRCP_ADDR"))
+		grpcConn, errConn := connectors.NewGRPC(ctx, os.Getenv("GRCP_ADDR"))
+		if errConn != nil {
+			return nil, errConn
+		}
 		res, errData = grpcConn.GetAllItems(ctx)
 	}
 
@@ -118,7 +129,10 @@ func (r *queryResolver) GetItem(ctx context.Context, id string) (*model.Item, er
 	case "":
 		res, errData = r.services.UpdateItem(ctx, id)
 	case "grpc":
-		grpcConn := connectors.NewGRPC(ctx, os.Getenv("GRCP_ADDR"))
+		grpcConn, errConn := connectors.NewGRPC(ctx, os.Getenv("GRCP_ADDR"))
+		if errConn != nil {
+			return nil, errConn
+		}
 		res, errData = grpcConn.GetItem(ctx, id)
 	}
 

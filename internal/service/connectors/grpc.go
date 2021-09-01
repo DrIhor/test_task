@@ -2,7 +2,6 @@ package connectors
 
 import (
 	"context"
-	"log"
 	"time"
 
 	"github.com/DrIhor/test_task/internal/models/items"
@@ -15,18 +14,18 @@ type GrpcConnector struct {
 	conn     *grpc.ClientConn
 }
 
-func NewGRPC(ctx context.Context, address string) *GrpcConnector {
+func NewGRPC(ctx context.Context, address string) (*GrpcConnector, error) {
 	ctx, _ = context.WithTimeout(ctx, 5*time.Second)
 
 	conn, err := grpc.DialContext(ctx, address, grpc.WithInsecure())
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	return &GrpcConnector{
 		itemStor: pb.NewItemStorageClient(conn),
 		conn:     conn,
-	}
+	}, nil
 }
 
 func (gr *GrpcConnector) AddNewItem(ctx context.Context, item items.Item) (string, error) {

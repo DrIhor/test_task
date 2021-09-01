@@ -1,10 +1,12 @@
 package main
 
 import (
+	"context"
 	"log"
 	"os"
+	"os/signal"
 
-	"github.com/DrIhor/test_task/internal/service/transport/gRPC"
+	"github.com/DrIhor/test_task/internal/transport/gRPC"
 )
 
 func init() {
@@ -37,6 +39,9 @@ func init() {
 }
 
 func main() {
+	// init data
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
 
 	// read config
 	server := gRPC.New()
@@ -47,7 +52,15 @@ func main() {
 		log.Fatal("Can`t config storage: ", err)
 	}
 
-	if err := server.Start(); err != nil {
+	// create shutdown
+	ctx, cancel := context.WithCancel(context.Background())
+	go func() {
+		oscall := <-c
+		log.Printf("system call:%+v", oscall)
+		cancel()
+	}()
+
+	if err := server.Start(ctx); err != nil {
 		log.Fatal("Problems with server run: ", err)
 	}
 }

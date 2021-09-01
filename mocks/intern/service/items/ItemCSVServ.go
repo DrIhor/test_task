@@ -3,6 +3,7 @@
 package mocks
 
 import (
+	context "context"
 	csv "encoding/csv"
 
 	mock "github.com/stretchr/testify/mock"
@@ -13,13 +14,13 @@ type ItemCSVServ struct {
 	mock.Mock
 }
 
-// AddFromCSV provides a mock function with given fields: rd
-func (_m *ItemCSVServ) AddFromCSV(rd *csv.Reader) ([]byte, error) {
-	ret := _m.Called(rd)
+// AddFromCSV provides a mock function with given fields: _a0, _a1
+func (_m *ItemCSVServ) AddFromCSV(_a0 context.Context, _a1 *csv.Reader) ([]byte, error) {
+	ret := _m.Called(_a0, _a1)
 
 	var r0 []byte
-	if rf, ok := ret.Get(0).(func(*csv.Reader) []byte); ok {
-		r0 = rf(rd)
+	if rf, ok := ret.Get(0).(func(context.Context, *csv.Reader) []byte); ok {
+		r0 = rf(_a0, _a1)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]byte)
@@ -27,8 +28,8 @@ func (_m *ItemCSVServ) AddFromCSV(rd *csv.Reader) ([]byte, error) {
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(*csv.Reader) error); ok {
-		r1 = rf(rd)
+	if rf, ok := ret.Get(1).(func(context.Context, *csv.Reader) error); ok {
+		r1 = rf(_a0, _a1)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -36,13 +37,13 @@ func (_m *ItemCSVServ) AddFromCSV(rd *csv.Reader) ([]byte, error) {
 	return r0, r1
 }
 
-// GetAllItemsAsCSV provides a mock function with given fields:
-func (_m *ItemCSVServ) GetAllItemsAsCSV() ([]byte, error) {
-	ret := _m.Called()
+// GetAllItemsAsCSV provides a mock function with given fields: _a0
+func (_m *ItemCSVServ) GetAllItemsAsCSV(_a0 context.Context) ([]byte, error) {
+	ret := _m.Called(_a0)
 
 	var r0 []byte
-	if rf, ok := ret.Get(0).(func() []byte); ok {
-		r0 = rf()
+	if rf, ok := ret.Get(0).(func(context.Context) []byte); ok {
+		r0 = rf(_a0)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]byte)
@@ -50,8 +51,8 @@ func (_m *ItemCSVServ) GetAllItemsAsCSV() ([]byte, error) {
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func() error); ok {
-		r1 = rf()
+	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = rf(_a0)
 	} else {
 		r1 = ret.Error(1)
 	}

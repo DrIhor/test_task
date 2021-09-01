@@ -7,36 +7,35 @@ import (
 )
 
 type ItemCRUDServ interface {
-	AddNewItem(itemModel.Item) (string, error)
-	GetAllItems() ([]byte, error)
-	GetItem(string) ([]byte, error)
-	DeleteItem(string) (bool, error)
-	UpdateItem(string) ([]byte, error)
+	AddNewItem(context.Context, itemModel.Item) (string, error)
+	GetAllItems(context.Context) ([]byte, error)
+	GetItem(context.Context, string) ([]byte, error)
+	DeleteItem(context.Context, string) (bool, error)
+	UpdateItem(context.Context, string) ([]byte, error)
 }
 
-func New(ctx context.Context, stor itemModel.ItemStorageServices) *ItemServices {
+func New(stor itemModel.ItemStorageServices) *ItemServices {
 	return &ItemServices{
 		storage: stor,
-		ctx:     ctx,
 	}
 }
 
-func (itemSrv *ItemServices) AddNewItem(item itemModel.Item) (string, error) {
-	return itemSrv.storage.AddNewItem(itemSrv.ctx, item)
+func (itemSrv *ItemServices) AddNewItem(ctx context.Context, item itemModel.Item) (string, error) {
+	return itemSrv.storage.AddNewItem(ctx, item)
 }
 
-func (itemSrv *ItemServices) GetAllItems() ([]byte, error) {
-	return itemSrv.storage.GetAllItems(itemSrv.ctx)
+func (itemSrv *ItemServices) GetAllItems(ctx context.Context) ([]byte, error) {
+	return itemSrv.storage.GetAllItems(ctx)
 }
 
-func (itemSrv *ItemServices) GetItem(id string) ([]byte, error) {
-	return itemSrv.storage.GetItem(itemSrv.ctx, id)
+func (itemSrv *ItemServices) GetItem(ctx context.Context, id string) ([]byte, error) {
+	return itemSrv.storage.GetItem(ctx, id)
 }
 
-func (itemSrv *ItemServices) DeleteItem(id string) (bool, error) {
-	return itemSrv.storage.DeleteItem(itemSrv.ctx, id)
+func (itemSrv *ItemServices) DeleteItem(ctx context.Context, id string) (bool, error) {
+	return itemSrv.storage.DeleteItem(ctx, id)
 }
 
-func (itemSrv *ItemServices) UpdateItem(id string) ([]byte, error) {
-	return itemSrv.storage.UpdateItem(itemSrv.ctx, id)
+func (itemSrv *ItemServices) UpdateItem(ctx context.Context, id string) ([]byte, error) {
+	return itemSrv.storage.UpdateItem(ctx, id)
 }

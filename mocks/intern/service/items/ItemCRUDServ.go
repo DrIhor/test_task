@@ -3,6 +3,8 @@
 package mocks
 
 import (
+	context "context"
+
 	items "github.com/DrIhor/test_task/internal/models/items"
 	mock "github.com/stretchr/testify/mock"
 )
@@ -12,20 +14,20 @@ type ItemCRUDServ struct {
 	mock.Mock
 }
 
-// AddNewItem provides a mock function with given fields: _a0
-func (_m *ItemCRUDServ) AddNewItem(_a0 items.Item) (string, error) {
-	ret := _m.Called(_a0)
+// AddNewItem provides a mock function with given fields: _a0, _a1
+func (_m *ItemCRUDServ) AddNewItem(_a0 context.Context, _a1 items.Item) (string, error) {
+	ret := _m.Called(_a0, _a1)
 
 	var r0 string
-	if rf, ok := ret.Get(0).(func(items.Item) string); ok {
-		r0 = rf(_a0)
+	if rf, ok := ret.Get(0).(func(context.Context, items.Item) string); ok {
+		r0 = rf(_a0, _a1)
 	} else {
 		r0 = ret.Get(0).(string)
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(items.Item) error); ok {
-		r1 = rf(_a0)
+	if rf, ok := ret.Get(1).(func(context.Context, items.Item) error); ok {
+		r1 = rf(_a0, _a1)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -33,20 +35,20 @@ func (_m *ItemCRUDServ) AddNewItem(_a0 items.Item) (string, error) {
 	return r0, r1
 }
 
-// DeleteItem provides a mock function with given fields: _a0
-func (_m *ItemCRUDServ) DeleteItem(_a0 string) (bool, error) {
-	ret := _m.Called(_a0)
+// DeleteItem provides a mock function with given fields: _a0, _a1
+func (_m *ItemCRUDServ) DeleteItem(_a0 context.Context, _a1 string) (bool, error) {
+	ret := _m.Called(_a0, _a1)
 
 	var r0 bool
-	if rf, ok := ret.Get(0).(func(string) bool); ok {
-		r0 = rf(_a0)
+	if rf, ok := ret.Get(0).(func(context.Context, string) bool); ok {
+		r0 = rf(_a0, _a1)
 	} else {
 		r0 = ret.Get(0).(bool)
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(string) error); ok {
-		r1 = rf(_a0)
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(_a0, _a1)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -54,35 +56,12 @@ func (_m *ItemCRUDServ) DeleteItem(_a0 string) (bool, error) {
 	return r0, r1
 }
 
-// GetAllItems provides a mock function with given fields:
-func (_m *ItemCRUDServ) GetAllItems() ([]byte, error) {
-	ret := _m.Called()
-
-	var r0 []byte
-	if rf, ok := ret.Get(0).(func() []byte); ok {
-		r0 = rf()
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]byte)
-		}
-	}
-
-	var r1 error
-	if rf, ok := ret.Get(1).(func() error); ok {
-		r1 = rf()
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
-// GetItem provides a mock function with given fields: _a0
-func (_m *ItemCRUDServ) GetItem(_a0 string) ([]byte, error) {
+// GetAllItems provides a mock function with given fields: _a0
+func (_m *ItemCRUDServ) GetAllItems(_a0 context.Context) ([]byte, error) {
 	ret := _m.Called(_a0)
 
 	var r0 []byte
-	if rf, ok := ret.Get(0).(func(string) []byte); ok {
+	if rf, ok := ret.Get(0).(func(context.Context) []byte); ok {
 		r0 = rf(_a0)
 	} else {
 		if ret.Get(0) != nil {
@@ -91,7 +70,7 @@ func (_m *ItemCRUDServ) GetItem(_a0 string) ([]byte, error) {
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(string) error); ok {
+	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
 		r1 = rf(_a0)
 	} else {
 		r1 = ret.Error(1)
@@ -100,13 +79,13 @@ func (_m *ItemCRUDServ) GetItem(_a0 string) ([]byte, error) {
 	return r0, r1
 }
 
-// UpdateItem provides a mock function with given fields: _a0
-func (_m *ItemCRUDServ) UpdateItem(_a0 string) ([]byte, error) {
-	ret := _m.Called(_a0)
+// GetItem provides a mock function with given fields: _a0, _a1
+func (_m *ItemCRUDServ) GetItem(_a0 context.Context, _a1 string) ([]byte, error) {
+	ret := _m.Called(_a0, _a1)
 
 	var r0 []byte
-	if rf, ok := ret.Get(0).(func(string) []byte); ok {
-		r0 = rf(_a0)
+	if rf, ok := ret.Get(0).(func(context.Context, string) []byte); ok {
+		r0 = rf(_a0, _a1)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]byte)
@@ -114,8 +93,31 @@ func (_m *ItemCRUDServ) UpdateItem(_a0 string) ([]byte, error) {
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(string) error); ok {
-		r1 = rf(_a0)
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(_a0, _a1)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// UpdateItem provides a mock function with given fields: _a0, _a1
+func (_m *ItemCRUDServ) UpdateItem(_a0 context.Context, _a1 string) ([]byte, error) {
+	ret := _m.Called(_a0, _a1)
+
+	var r0 []byte
+	if rf, ok := ret.Get(0).(func(context.Context, string) []byte); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]byte)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(_a0, _a1)
 	} else {
 		r1 = ret.Error(1)
 	}

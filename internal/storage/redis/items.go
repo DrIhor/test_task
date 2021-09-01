@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 
 	itemsModel "github.com/DrIhor/test_task/internal/models/items"
 	redis "github.com/go-redis/redis/v8"
@@ -15,7 +14,7 @@ type RedisStorage struct {
 	client *redis.Client
 }
 
-func New() *RedisStorage {
+func New() (*RedisStorage, error) {
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     "localhost:6379",
 		Password: "", // no password set
@@ -24,12 +23,12 @@ func New() *RedisStorage {
 
 	_, err := rdb.Ping(context.Background()).Result()
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	fmt.Println("Redis is connected")
 
-	return &RedisStorage{client: rdb}
+	return &RedisStorage{client: rdb}, nil
 }
 
 func (db *RedisStorage) AddNewItem(ctx context.Context, newItem itemsModel.Item) (string, error) {

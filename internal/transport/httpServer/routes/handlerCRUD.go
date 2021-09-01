@@ -12,7 +12,7 @@ import (
 )
 
 // CRUD implementation for all endpoints
-// Read
+// Readty
 func (h *HandlerItemsServ) ShowAllItems(w http.ResponseWriter, r *http.Request) {
 
 	var errData error
@@ -21,12 +21,23 @@ func (h *HandlerItemsServ) ShowAllItems(w http.ResponseWriter, r *http.Request) 
 	case "":
 		res, errData = h.services.GetAllItems(h.ctx)
 	case "grpc":
-		grpcConn := connectors.NewGRPC(h.ctx, os.Getenv("GRCP_ADDR"))
+		grpcConn, errConn := connectors.NewGRPC(h.ctx, os.Getenv("GRCP_ADDR"))
+		if errConn != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
 		res, errData = grpcConn.GetAllItems(h.ctx)
 	}
 
 	if errData != nil {
-		res = msgServ.CreateMsgResp(errData.Error())
+		ms := msgServ.NewMessage()
+		res, err := ms.CreateMsgResp(errData.Error())
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write(res)
 		return
@@ -49,7 +60,6 @@ func (h *HandlerItemsServ) ShowItem(w http.ResponseWriter, r *http.Request) {
 	}
 
 	id := keys[0]
-
 	_, err := uuid.Parse(id)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -62,12 +72,23 @@ func (h *HandlerItemsServ) ShowItem(w http.ResponseWriter, r *http.Request) {
 	case "":
 		res, errData = h.services.GetItem(h.ctx, id)
 	case "grpc":
-		grpcConn := connectors.NewGRPC(h.ctx, os.Getenv("GRCP_ADDR"))
+		grpcConn, errConn := connectors.NewGRPC(h.ctx, os.Getenv("GRCP_ADDR"))
+		if errConn != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
 		res, errData = grpcConn.GetItem(h.ctx, id)
 	}
 
 	if errData != nil {
-		res = msgServ.CreateMsgResp(errData.Error())
+		ms := msgServ.NewMessage()
+		res, err := ms.CreateMsgResp(err.Error())
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write(res)
 		return
@@ -89,7 +110,13 @@ func (h *HandlerItemsServ) AddNewItem(w http.ResponseWriter, r *http.Request) {
 	var obj itemModel.Item
 	err := json.NewDecoder(r.Body).Decode(&obj)
 	if err != nil || (obj == itemModel.Item{}) {
-		res := msgServ.CreateMsgResp("Empty body. Change information")
+		ms := msgServ.NewMessage()
+		res, err := ms.CreateMsgResp("Empty body. Change information")
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write(res)
 		return
@@ -101,12 +128,22 @@ func (h *HandlerItemsServ) AddNewItem(w http.ResponseWriter, r *http.Request) {
 	case "":
 		id, errData = h.services.AddNewItem(h.ctx, obj)
 	case "grpc":
-		grpcConn := connectors.NewGRPC(h.ctx, os.Getenv("GRCP_ADDR"))
+		grpcConn, errConn := connectors.NewGRPC(h.ctx, os.Getenv("GRCP_ADDR"))
+		if errConn != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
 		id, errData = grpcConn.AddNewItem(h.ctx, obj)
 	}
 
 	if errData != nil {
-		res := msgServ.CreateMsgResp(errData.Error())
+		ms := msgServ.NewMessage()
+		res, err := ms.CreateMsgResp(err.Error())
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write(res)
 		return
@@ -118,7 +155,13 @@ func (h *HandlerItemsServ) AddNewItem(w http.ResponseWriter, r *http.Request) {
 
 	res, err := json.Marshal(item)
 	if err != nil {
-		res := msgServ.CreateMsgResp(errData.Error())
+		ms := msgServ.NewMessage()
+		res, err := ms.CreateMsgResp(err.Error())
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write(res)
 	}
@@ -148,7 +191,12 @@ func (h *HandlerItemsServ) BuyItems(w http.ResponseWriter, r *http.Request) {
 	case "":
 		res, errData = h.services.UpdateItem(h.ctx, id)
 	case "grpc":
-		grpcConn := connectors.NewGRPC(h.ctx, os.Getenv("GRCP_ADDR"))
+		grpcConn, errConn := connectors.NewGRPC(h.ctx, os.Getenv("GRCP_ADDR"))
+		if errConn != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
 		res, errData = grpcConn.UpdateItem(h.ctx, id)
 	}
 
@@ -159,7 +207,13 @@ func (h *HandlerItemsServ) BuyItems(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if errData != nil {
-		res := msgServ.CreateMsgResp(errData.Error())
+		ms := msgServ.NewMessage()
+		res, err := ms.CreateMsgResp(err.Error())
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write(res)
 		return
@@ -189,12 +243,23 @@ func (h *HandlerItemsServ) DeleteItem(w http.ResponseWriter, r *http.Request) {
 	case "":
 		done, errData = h.services.DeleteItem(h.ctx, id)
 	case "grpc":
-		grpcConn := connectors.NewGRPC(h.ctx, os.Getenv("GRCP_ADDR"))
+		grpcConn, errConn := connectors.NewGRPC(h.ctx, os.Getenv("GRCP_ADDR"))
+		if errConn != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
 		done, errData = grpcConn.DeleteItem(h.ctx, id)
 	}
 
 	if errData != nil {
-		res := msgServ.CreateMsgResp(errData.Error())
+		ms := msgServ.NewMessage()
+		res, err := ms.CreateMsgResp(err.Error())
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write(res)
 		return
