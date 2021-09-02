@@ -1,4 +1,4 @@
-package elk
+package mongo
 
 import (
 	"context"
@@ -13,9 +13,7 @@ import (
 )
 
 func init() {
-	os.Setenv("ELASTIC_ADDR", "http://localhost:9200")
-	os.Setenv("ELASTIC_USER", "")
-	os.Setenv("ELASTIC_PASSWORD", "")
+	os.Setenv("MONGO_ADDR", "localhost:27017/?readPreference=primary&ssl=false")
 }
 
 func isValidUUID(u string) bool {

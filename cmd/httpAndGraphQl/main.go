@@ -33,6 +33,11 @@ func init() {
 	// mongo
 	os.Setenv("MONGO_ADDR", "localhost:27017/?readPreference=primary&ssl=false")
 
+	//redis
+	os.Setenv("REDIS_ADDR", "localhost:6379")
+	os.Setenv("REDIS_PASS", "")
+	os.Setenv("REDIS_DB", "0")
+
 	// elk
 	os.Setenv("ELASTIC_ADDR", "http://localhost:9200")
 	os.Setenv("ELASTIC_USER", "")

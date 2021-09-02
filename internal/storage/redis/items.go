@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"os"
+	"strconv"
 
 	itemsModel "github.com/DrIhor/test_task/internal/models/items"
 	redis "github.com/go-redis/redis/v8"
@@ -15,18 +17,22 @@ type RedisStorage struct {
 }
 
 func New() (*RedisStorage, error) {
-	rdb := redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
-		Password: "", // no password set
-		DB:       0,  // use default DB
-	})
 
-	_, err := rdb.Ping(context.Background()).Result()
+	db, err := strconv.Atoi(os.Getenv("REDIS_DB"))
 	if err != nil {
 		return nil, err
 	}
 
-	fmt.Println("Redis is connected")
+	rdb := redis.NewClient(&redis.Options{
+		Addr:     os.Getenv("REDIS_ADDR"),
+		Password: os.Getenv("REDIS_PASS"),
+		DB:       db,
+	})
+
+	_, err = rdb.Ping(context.Background()).Result()
+	if err != nil {
+		return nil, err
+	}
 
 	return &RedisStorage{client: rdb}, nil
 }
@@ -34,7 +40,9 @@ func New() (*RedisStorage, error) {
 func (db *RedisStorage) AddNewItem(ctx context.Context, newItem itemsModel.Item) (string, error) {
 	newID := uuid.New()
 
-	_, err := db.client.Set(ctx, newID.String(), &newItem, 0).Result()
+	newItemRd := itemRedis(newItem)
+
+	_, err := db.client.Set(ctx, newID.String(), &newItemRd, 0).Result()
 	if err != nil {
 		return "", err
 	}
@@ -137,8 +145,10 @@ func (db *RedisStorage) UpdateItem(ctx context.Context, id string) ([]byte, erro
 
 	}
 
-	_, err = db.client.Set(ctx, id, &item, 0).Result()
+	itemRd := itemRedis(item)
+	_, err = db.client.Set(ctx, id, &itemRd, 0).Result()
 	if err != nil {
+		fmt.Println(err)
 		return nil, err
 	}
 

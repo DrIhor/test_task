@@ -1,4 +1,4 @@
-package elk
+package redis
 
 import (
 	"context"
@@ -13,9 +13,9 @@ import (
 )
 
 func init() {
-	os.Setenv("ELASTIC_ADDR", "http://localhost:9200")
-	os.Setenv("ELASTIC_USER", "")
-	os.Setenv("ELASTIC_PASSWORD", "")
+	os.Setenv("REDIS_ADDR", "localhost:6379")
+	os.Setenv("REDIS_PASS", "")
+	os.Setenv("REDIS_DB", "0")
 }
 
 func isValidUUID(u string) bool {
@@ -53,6 +53,23 @@ func TestGetAllItems(t *testing.T) {
 	_, err = db.GetAllItems(context.Background())
 
 	assert.Nil(t, err, "get all items err")
+}
+
+func TestGetItem(t *testing.T) {
+	db, err := New()
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	data, err := db.GetItem(context.Background(), testItem.ID)
+	var resItem items.Item
+	json.Unmarshal(data, &resItem)
+
+	// create zero value of return data
+	testItemTMP := testItem
+	testItemTMP.ID = ""
+	assert.Equal(t, testItemTMP, resItem, "get one item")
+	assert.Nil(t, err, "get one item err")
 }
 
 func TestUpdateItem(t *testing.T) {
@@ -112,7 +129,6 @@ func TestUpdateItem(t *testing.T) {
 
 	for _, tc := range testCases {
 		data, err := db.UpdateItem(tc.request.ctx, tc.request.item.ID)
-
 		if tc.want.isErr {
 			assert.Error(t, err, tc.name)
 		} else {

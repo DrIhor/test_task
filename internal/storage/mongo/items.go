@@ -42,8 +42,6 @@ func New() (*MongoStorage, error) {
 		return nil, err
 	}
 
-	fmt.Println("MongoDB connected")
-
 	return &MongoStorage{db: client.Database("shop")}, err
 }
 
@@ -124,6 +122,8 @@ func (mg *MongoStorage) UpdateItem(ctx context.Context, id string) ([]byte, erro
 	collection := mg.db.Collection("items")
 
 	var item itemsModel.Item
+
+	after := options.After
 	err := collection.FindOneAndUpdate(
 		ctx,
 		bson.M{"_id": id},
@@ -131,12 +131,16 @@ func (mg *MongoStorage) UpdateItem(ctx context.Context, id string) ([]byte, erro
 			"$inc": bson.M{
 				"itemsNumber": -1,
 			},
-		}).Decode(&item)
+		},
+		&options.FindOneAndUpdateOptions{
+			ReturnDocument: &after,
+		},
+	).Decode(&item)
 	if err != nil {
 		return nil, err
 	}
 
-	if item.ItemsNumber <= 0 {
+	if item.ItemsNumber < 0 {
 		_, err := collection.DeleteOne(
 			ctx,
 			bson.M{

@@ -1,4 +1,4 @@
-package elk
+package postgres
 
 import (
 	"context"
@@ -13,9 +13,11 @@ import (
 )
 
 func init() {
-	os.Setenv("ELASTIC_ADDR", "http://localhost:9200")
-	os.Setenv("ELASTIC_USER", "")
-	os.Setenv("ELASTIC_PASSWORD", "")
+	os.Setenv("POSTGRE_HOST", "localhost")
+	os.Setenv("POSTGRE_PORT", "5432")
+	os.Setenv("POSTGRE_USER", "postgres")
+	os.Setenv("POSTGRE_PASS", "postgres")
+	os.Setenv("POSTGRE_DB", "postgres")
 }
 
 func isValidUUID(u string) bool {

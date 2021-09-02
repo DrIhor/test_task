@@ -34,8 +34,6 @@ func New() (*PostgreStorage, error) {
 		return nil, err
 	}
 
-	fmt.Println("DB connected")
-
 	return &PostgreStorage{db: conn}, nil
 }
 

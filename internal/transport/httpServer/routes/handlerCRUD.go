@@ -12,7 +12,7 @@ import (
 )
 
 // CRUD implementation for all endpoints
-// Readty
+// Read
 func (h *HandlerItemsServ) ShowAllItems(w http.ResponseWriter, r *http.Request) {
 
 	var errData error

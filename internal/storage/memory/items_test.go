@@ -1,22 +1,15 @@
-package elk
+package memory
 
 import (
 	"context"
 	"encoding/json"
 	"log"
-	"os"
 	"testing"
 
 	"github.com/DrIhor/test_task/internal/models/items"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 )
-
-func init() {
-	os.Setenv("ELASTIC_ADDR", "http://localhost:9200")
-	os.Setenv("ELASTIC_USER", "")
-	os.Setenv("ELASTIC_PASSWORD", "")
-}
 
 func isValidUUID(u string) bool {
 	_, err := uuid.Parse(u)
@@ -30,12 +23,13 @@ var testItem = items.Item{
 	Description: "test descr",
 }
 
-func TestAddItem(t *testing.T) {
-	db, err := New()
-	if err != nil {
-		log.Fatalln(err)
-	}
+var db *DB // single connection to db
 
+func init() {
+	db = New()
+}
+
+func TestAddItem(t *testing.T) {
 	id, err := db.AddNewItem(context.Background(), testItem)
 
 	assert.Nil(t, err, "add item error")
@@ -45,22 +39,12 @@ func TestAddItem(t *testing.T) {
 }
 
 func TestGetAllItems(t *testing.T) {
-	db, err := New()
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	_, err = db.GetAllItems(context.Background())
+	_, err := db.GetAllItems(context.Background())
 
 	assert.Nil(t, err, "get all items err")
 }
 
 func TestUpdateItem(t *testing.T) {
-	db, err := New()
-	if err != nil {
-		log.Fatalln(err)
-	}
-
 	type data struct {
 		item *items.Item
 		ctx  context.Context
@@ -141,12 +125,7 @@ func TestUpdateItem(t *testing.T) {
 }
 
 func TestDeleteItem(t *testing.T) {
-	db, err := New()
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	_, err = db.DeleteItem(context.Background(), testItem.ID)
+	_, err := db.DeleteItem(context.Background(), testItem.ID)
 
 	assert.Nil(t, err, "delete item err")
 }
