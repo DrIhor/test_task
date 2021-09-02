@@ -6,10 +6,12 @@ require (
 	github.com/99designs/gqlgen v0.13.1-0.20210729011107-9a214e80158b
 	github.com/elastic/go-elasticsearch/v7 v7.14.0
 	github.com/go-redis/redis/v8 v8.11.3
+	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/google/uuid v1.3.0
 	github.com/gorilla/mux v1.8.0
 	github.com/jszwec/csvutil v1.5.0
 	github.com/lib/pq v1.10.2
+	github.com/pascaldekloe/jwt v1.10.0 // indirect
 	github.com/stretchr/testify v1.7.0
 	github.com/vektah/gqlparser/v2 v2.2.0
 	go.mongodb.org/mongo-driver v1.7.1

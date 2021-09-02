@@ -29,6 +29,11 @@ func init() {
 	os.Setenv("POSTGRE_PASS", "postgres")
 	os.Setenv("POSTGRE_DB", "postgres")
 
+	//redis
+	os.Setenv("REDIS_ADDR", "localhost:6379")
+	os.Setenv("REDIS_PASS", "")
+	os.Setenv("REDIS_DB", "0")
+
 	// mongo
 	os.Setenv("MONGO_ADDR", "localhost:27017/?readPreference=primary&ssl=false")
 

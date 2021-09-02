@@ -119,6 +119,38 @@ func TestFileDownload(t *testing.T) {
 				contetType: "text/csv",
 			},
 		},
+		{
+			name:    "wrong method",
+			service: &mocks.ItemSrv{},
+			serviceFuncResp: func(mc *mocks.ItemSrv, items []byte) {
+				mc.On("GetAllItemsAsCSV",
+					mock.Anything,
+				).Return(func(_ context.Context) []byte {
+					return items
+				}, nil)
+			},
+			request: request{
+				endpoint: "/items/csv",
+				method:   "DELETE",
+				body: func() []byte {
+					info := items
+
+					res, err := csvutil.Marshal(info)
+					if err != nil {
+						log.Fatal("Input data marshal: ", err)
+					}
+
+					return res
+				},
+			},
+			want: wantResp{
+				code: 405,
+				body: func() []byte {
+					return nil
+				},
+				contetType: "",
+			},
+		},
 	}
 
 	for _, tc := range testCases {

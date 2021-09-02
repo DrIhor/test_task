@@ -1,10 +1,8 @@
-package routes
+package middleware
 
-import (
-	"net/http"
-)
+import "net/http"
 
-func Middleware(h http.Handler) http.Handler {
+func JsonRespHeaders(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE")
 		w.Header().Add("Content-Type", "application/json")

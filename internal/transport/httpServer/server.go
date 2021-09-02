@@ -18,7 +18,9 @@ import (
 	"github.com/DrIhor/test_task/internal/storage/redis"
 	"github.com/DrIhor/test_task/internal/transport/graphQL/graph"
 	"github.com/DrIhor/test_task/internal/transport/graphQL/graph/generated"
+	"github.com/DrIhor/test_task/internal/transport/httpServer/middleware"
 	"github.com/DrIhor/test_task/internal/transport/httpServer/routes"
+
 	"github.com/gorilla/mux"
 
 	er "github.com/DrIhor/test_task/internal/errors"
@@ -129,7 +131,7 @@ func (s *Server) getHttpAddress() string {
 func (s *Server) Start(ctx context.Context) error {
 	server := &http.Server{
 		Addr:         s.getHttpAddress(),
-		Handler:      routes.Middleware(s.router),
+		Handler:      middleware.JwtSessionCheck(middleware.JsonRespHeaders(s.router)),
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 5 * time.Second,
 	}
