@@ -1,14 +1,7 @@
 version: "3"
 
 services: 
-    server:
-        container_name: "server"
-        build: "./"
-        ports: 
-            - "80:8080"
-        depends_on: 
-            - postgresDB
-            
+           
     postgresDB:
         container_name: "postgresDB"
         image: postgres:latest
@@ -19,3 +12,31 @@ services:
             POSTGRES_USER: "postgres"
         ports: 
             - "5432:5432"
+
+    mongodb:
+        image : mongo
+        container_name: mongodb
+        environment:
+            - PUID=1000
+            - PGID=1000
+        volumes:
+            - /home/barry/mongodb/database:/data/db
+        ports:
+            - 27017:27017
+
+    redis:
+        container_name : redis
+        image: redis
+        ports:
+            - 6379:6379
+
+    es01:
+        image: elasticsearch:7.14.0
+        container_name: es01
+        environment:
+            - discovery.type=single-node
+        ports:
+            - 9200:9200
+
+
+ 

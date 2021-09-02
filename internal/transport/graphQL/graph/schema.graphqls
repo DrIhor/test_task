@@ -1,0 +1,30 @@
+schema { 
+  query: Query
+  mutation: Mutation
+}
+
+type Item {
+    id: String
+    name: String!
+    price: Int!
+    itemsNumber: Int!
+    desc: String
+}
+
+type Query {
+    getItems: [Item]
+    getItem(Id: ID!): Item
+}
+
+type Mutation {
+    addItem(item: Iteminput!): String
+    updatePerson(id: ID!): Item
+    deletePerson(id: ID!): Boolean
+}
+
+input Iteminput {
+    name: String!
+    price: Int!
+    itemsNumber: Int!
+    desc: String
+}
