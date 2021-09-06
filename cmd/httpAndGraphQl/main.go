@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"log"
 	"os"
 	"os/signal"
@@ -9,21 +10,28 @@ import (
 	"github.com/DrIhor/test_task/internal/transport/httpServer"
 )
 
-func init() {
+func addEnvVariables() {
+
+	// server general configuration
 	os.Setenv("Server_Cancel_Timeout", "5")
 	os.Setenv("STORAGE_TYPE", "")
 
+	// server start
+	os.Setenv("STORAGE", "postgres")
+	os.Setenv("SERVER_PORT", "8080")
+	os.Setenv("SERVER_HOST", "")
+
+	// if check tocken at middleware
 	os.Setenv("CHECK_TOKEN", "false")
+
+	/**
+	 * configuration of each storage
+	 */
 
 	// grpc
 	os.Setenv("GRCP_PORT", "8080")
 	os.Setenv("GRCP_HOST", "")
 	os.Setenv("GRCP_ADDR", ":8081")
-
-	// server
-	os.Setenv("STORAGE", "postgres")
-	os.Setenv("SERVER_PORT", "8080")
-	os.Setenv("SERVER_HOST", "")
 
 	// postgres
 	os.Setenv("POSTGRE_HOST", "localhost")
@@ -44,10 +52,16 @@ func init() {
 	os.Setenv("ELASTIC_ADDR", "http://localhost:9200")
 	os.Setenv("ELASTIC_USER", "")
 	os.Setenv("ELASTIC_PASSWORD", "")
-
 }
 
 func main() {
+
+	boolAddEnvVars := flag.Bool("envVars", false, "check if add env variables")
+	flag.Parse()
+
+	if *boolAddEnvVars {
+		addEnvVariables()
+	}
 
 	// init data
 	c := make(chan os.Signal, 1)

@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"log"
 	"os"
 	"os/signal"
@@ -9,18 +10,17 @@ import (
 	"github.com/DrIhor/test_task/internal/transport/gRPC"
 )
 
-func init() {
-	os.Setenv("STORAGE_TYPE", "grpc")
+func addEnvVariables() {
+	os.Setenv("STORAGE_TYPE", "grpc") // choose type of storage
 
 	// grpc
 	os.Setenv("GRCP_PORT", "8080")
 	os.Setenv("GRCP_HOST", "")
 	os.Setenv("GRCP_ADDR", ":8081")
 
-	// grpc
-	os.Setenv("STORAGE", "elk")
-	os.Setenv("SERVER_PORT", "8080")
-	os.Setenv("SERVER_HOST", "")
+	/**
+	 * configuration of each storage
+	 */
 
 	// postgres
 	os.Setenv("POSTGRE_HOST", "localhost")
@@ -44,6 +44,14 @@ func init() {
 }
 
 func main() {
+
+	boolAddEnvVars := flag.Bool("envVars", false, "check if add env variables")
+	flag.Parse()
+
+	if *boolAddEnvVars {
+		addEnvVariables()
+	}
+
 	// init data
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
