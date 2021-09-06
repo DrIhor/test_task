@@ -1,0 +1,321 @@
+{
+	"info": {
+		"_postman_id": "dff2687d-0d09-41a2-9b0a-c7a03c7a222d",
+		"name": "shop",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "GraphQL",
+			"item": [
+				{
+					"name": "mutations",
+					"item": [
+						{
+							"name": "addItem",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "mutation addItem ($item: Iteminput!) {\n    addItem (item: $item)\n}",
+										"variables": "{\n  \"item\": {\n    \"name\": \"\",\n    \"price\": 0,\n    \"itemsNumber\": 0,\n    \"desc\": \"\"\n  }\n}"
+									}
+								},
+								"url": {
+									"raw": "{{url}}",
+									"host": [
+										"{{url}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "updatePerson",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "mutation updatePerson ($id: ID!) {\n    updatePerson (id: $id) {\n        id\n        name\n        price\n        itemsNumber\n        desc\n    }\n}",
+										"variables": "{\n  \"id\": 100\n}"
+									}
+								},
+								"url": {
+									"raw": "{{url}}",
+									"host": [
+										"{{url}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "deletePerson",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "mutation deletePerson ($id: ID!) {\n    deletePerson (id: $id)\n}",
+										"variables": "{\n  \"id\": 0\n}"
+									}
+								},
+								"url": {
+									"raw": "{{url}}",
+									"host": [
+										"{{url}}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "queries",
+					"item": [
+						{
+							"name": "getItems",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "query getItems {\n    getItems {\n        id\n        name\n        price\n        itemsNumber\n        desc\n    }\n}",
+										"variables": "{}"
+									}
+								},
+								"url": {
+									"raw": "{{url}}/query/",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"query",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "getItem",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "graphql",
+									"graphql": {
+										"query": "query getItem ($Id: ID!) {\n    getItem (Id: $Id) {\n        id\n        name\n        price\n        itemsNumber\n        desc\n    }\n}",
+										"variables": "{\n  \"Id\": 0\n}"
+									}
+								},
+								"url": {
+									"raw": "{{url}}",
+									"host": [
+										"{{url}}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "HTTP",
+			"item": [
+				{
+					"name": "CSV",
+					"item": [
+						{
+							"name": "Get all items",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/items/csv",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"items",
+										"csv"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "New Request",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "file",
+											"type": "file",
+											"src": "/C:/Users/ihor.darmoriz/go/src/github.com/DrIhor/test_task/files/items.csv"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{url}}/items/csv",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"items",
+										"csv"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Items",
+					"item": [
+						{
+							"name": "Items",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/items",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"items"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Item",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/item?id=344ffb8a-9357-4798-a263-9a84d3c22b9e",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"item"
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "344ffb8a-9357-4798-a263-9a84d3c22b9e"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Add item",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"name\": \"Mike\",\r\n    \"price\": 15,\r\n    \"itemsNumber\": 12,\r\n    \"desc\": \"Some new\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/item",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"item"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Buy item",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/item?id=5",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"item"
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "5"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Remove item",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"name\": \"Mike\",\r\n    \"price\": 15,\r\n    \"itemsNumber\": 12,\r\n    \"desc\": \"Some new\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/item?id=11",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"item"
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "11"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		}
+	]
+}
