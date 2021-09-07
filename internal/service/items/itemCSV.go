@@ -11,11 +11,17 @@ import (
 	"github.com/jszwec/csvutil"
 )
 
+// item services using CSV files
 type ItemCSVServ interface {
 	AddFromCSV(context.Context, *csv.Reader) ([]byte, error)
 	GetAllItemsAsCSV(context.Context) ([]byte, error)
 }
 
+/**
+ * main services logic
+ */
+
+// read csv file and write into DB as records
 func (itemSrv *ItemServices) AddFromCSV(ctx context.Context, rd *csv.Reader) ([]byte, error) {
 	var (
 		itemHeader string          // struct fields
@@ -40,12 +46,14 @@ func (itemSrv *ItemServices) AddFromCSV(ctx context.Context, rd *csv.Reader) ([]
 			continue
 		}
 
+		// transform data
 		csvIteam := []byte(itemHeader + strings.Join(row, ","))
 		var items []itemModel.Item
 		if err := csvutil.Unmarshal(csvIteam, &items); err != nil {
 			return nil, err
 		}
 
+		// save data
 		for _, item := range items {
 			if item != (itemModel.Item{}) {
 				id, err := itemSrv.AddNewItem(ctx, item)
@@ -65,11 +73,14 @@ func (itemSrv *ItemServices) AddFromCSV(ctx context.Context, rd *csv.Reader) ([]
 	return res, nil
 }
 
+// read data from DB and return to user as csv file
 func (itemSrv *ItemServices) GetAllItemsAsCSV(ctx context.Context) ([]byte, error) {
 	byteData, err := itemSrv.GetAllItems(ctx)
 	if err != nil {
 		return nil, err
 	}
+
+	// convert data into items to return using `csvutil` marshal
 	var itemsSlice []itemModel.Item
 	if err := json.Unmarshal(byteData, &itemsSlice); err != nil {
 		return nil, err

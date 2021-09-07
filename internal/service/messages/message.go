@@ -1,3 +1,4 @@
+// create custom answers(error, message, etc)
 package messages
 
 import (
@@ -11,6 +12,5 @@ func NewMessage() *responce {
 func (ms *responce) CreateMsgResp(message string) ([]byte, error) {
 
 	ms.Msg = message
-
 	return json.Marshal(ms)
 }

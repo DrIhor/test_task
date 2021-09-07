@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"fmt"
 	"net/http"
 	"os"
 	"strconv"
@@ -9,10 +8,10 @@ import (
 	jwt "github.com/DrIhor/test_task/internal/service/jwt"
 )
 
+// check if Google JWT tocken session expired
 func JwtSessionCheck(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		check, err := strconv.ParseBool(os.Getenv("CHECK_TOKEN"))
-		fmt.Println(check, err)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return

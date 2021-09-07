@@ -66,6 +66,7 @@ func ValidateGoogleExpireJWT(tokenString string) (bool, error) {
 		return false, er.TockenExpired
 	}
 
+	// log user using JWT tocken
 	fmt.Println("FirstName: ", claims.FirstName)
 	fmt.Println("LastName: ", claims.LastName)
 

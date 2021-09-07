@@ -14,7 +14,7 @@ import (
 // CRUD implementation for all endpoints
 // Read
 func (h *HandlerItemsServ) ShowAllItems(w http.ResponseWriter, r *http.Request) {
-
+	// check service type and do some logic
 	var errData error
 	var res []byte
 	switch os.Getenv("STORAGE_TYPE") {
@@ -53,6 +53,7 @@ func (h *HandlerItemsServ) ShowAllItems(w http.ResponseWriter, r *http.Request) 
 }
 
 func (h *HandlerItemsServ) ShowItem(w http.ResponseWriter, r *http.Request) {
+	// read request add data
 	keys, ok := r.URL.Query()["id"]
 	if !ok || len(keys[0]) < 1 {
 		w.WriteHeader(http.StatusBadRequest)
@@ -66,6 +67,7 @@ func (h *HandlerItemsServ) ShowItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// check service type and do some logic
 	var errData error
 	var res []byte
 	switch os.Getenv("STORAGE_TYPE") {
@@ -106,7 +108,7 @@ func (h *HandlerItemsServ) ShowItem(w http.ResponseWriter, r *http.Request) {
 
 // Create
 func (h *HandlerItemsServ) AddNewItem(w http.ResponseWriter, r *http.Request) {
-
+	// check if request data have some info
 	var obj itemModel.Item
 	err := json.NewDecoder(r.Body).Decode(&obj)
 	if err != nil || (obj == itemModel.Item{}) {
@@ -122,6 +124,7 @@ func (h *HandlerItemsServ) AddNewItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// check service type and do some logic
 	var id string
 	var errData error
 	switch os.Getenv("STORAGE_TYPE") {
@@ -149,6 +152,7 @@ func (h *HandlerItemsServ) AddNewItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// create response data
 	item := itemModel.Item{
 		ID: id,
 	}
@@ -172,6 +176,7 @@ func (h *HandlerItemsServ) AddNewItem(w http.ResponseWriter, r *http.Request) {
 
 // Update
 func (h *HandlerItemsServ) BuyItems(w http.ResponseWriter, r *http.Request) {
+	// read request add data
 	keys, ok := r.URL.Query()["id"]
 	if !ok || len(keys[0]) < 1 {
 		w.WriteHeader(http.StatusBadRequest)
@@ -185,6 +190,7 @@ func (h *HandlerItemsServ) BuyItems(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// check service type and do some logic
 	var errData error
 	var res []byte
 	switch os.Getenv("STORAGE_TYPE") {
@@ -237,6 +243,7 @@ func (h *HandlerItemsServ) DeleteItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// check service type and do some logic
 	var done bool
 	var errData error
 	switch os.Getenv("STORAGE_TYPE") {

@@ -129,17 +129,29 @@ func (s *Server) getHttpAddress() string {
 }
 
 func (s *Server) Start(ctx context.Context) error {
+	// get add config
+	readTm, errReadTm := strconv.Atoi(os.Getenv("ReadTimeout"))
+	if errReadTm != nil {
+		return errReadTm
+	}
+	writeTm, errWriteTm := strconv.Atoi(os.Getenv("WriteTimeout"))
+	if errWriteTm != nil {
+		return errWriteTm
+	}
+
+	// init server
 	server := &http.Server{
 		Addr:         s.getHttpAddress(),
 		Handler:      middleware.JwtSessionCheck(middleware.JsonRespHeaders(s.router)),
-		ReadTimeout:  5 * time.Second,
-		WriteTimeout: 5 * time.Second,
+		ReadTimeout:  time.Duration(readTm) * time.Second,
+		WriteTimeout: time.Duration(writeTm) * time.Second,
 	}
 	cancelTimeout, errTimeout := strconv.Atoi(os.Getenv("Server_Cancel_Timeout"))
 	if errTimeout != nil {
 		return errTimeout
 	}
 
+	// run server
 	go func() {
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatal(err)
@@ -148,7 +160,12 @@ func (s *Server) Start(ctx context.Context) error {
 
 	fmt.Println("Server is running on: " + s.getHttpAddress())
 
-	<-ctx.Done()
+	<-ctx.Done() // wait end of work
+
+	/**
+	 * start graceful shutdown
+	 */
+
 	log.Println("Server stopped")
 
 	ctxShutDown, cancel := context.WithTimeout(context.Background(), time.Duration(cancelTimeout)*time.Second)
@@ -159,6 +176,5 @@ func (s *Server) Start(ctx context.Context) error {
 	}
 
 	log.Printf("Server exited properly")
-
 	return nil
 }

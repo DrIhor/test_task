@@ -4,6 +4,7 @@ import (
 	"context"
 )
 
+// main item model
 type Item struct {
 	ID          string `bson:"_id" json:"id,omitempty" csv:"-,omitempty"`
 	Name        string `bson:"name,omitempty" json:"name,omitempty" csv:"name"`

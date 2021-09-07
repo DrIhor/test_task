@@ -14,6 +14,7 @@ type GrpcConnector struct {
 	conn     *grpc.ClientConn
 }
 
+// create new GRPC connection with items storage services
 func NewGRPC(ctx context.Context, address string) (*GrpcConnector, error) {
 	ctx, _ = context.WithTimeout(ctx, 5*time.Second)
 
@@ -27,6 +28,10 @@ func NewGRPC(ctx context.Context, address string) (*GrpcConnector, error) {
 		conn:     conn,
 	}, nil
 }
+
+/**
+ * service calls
+ */
 
 func (gr *GrpcConnector) AddNewItem(ctx context.Context, item items.Item) (string, error) {
 	reqItem := pb.Item{

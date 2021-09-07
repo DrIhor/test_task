@@ -14,6 +14,8 @@ func addEnvVariables() {
 
 	// server general configuration
 	os.Setenv("Server_Cancel_Timeout", "5")
+	os.Setenv("ReadTimeout", "5")
+	os.Setenv("WriteTimeout", "5")
 	os.Setenv("STORAGE_TYPE", "")
 
 	// server start

@@ -26,7 +26,6 @@ func (s *Server) AddNewItem(ctx context.Context, in *pb.Item) (*pb.ItemID, error
 }
 
 func (s *Server) GetAllItems(ctx context.Context, in *pb.NoneObjectRequest) (*pb.EncodeItemResponse, error) {
-
 	res, err := s.storage.GetAllItems(ctx)
 	if err != nil {
 		return nil, err
@@ -50,7 +49,6 @@ func (s *Server) GetItem(ctx context.Context, in *pb.ItemID) (*pb.EncodeItemResp
 }
 
 func (s *Server) DeleteItem(ctx context.Context, in *pb.ItemID) (*pb.NoneObjectResp, error) {
-
 	done, err := s.storage.DeleteItem(ctx, in.ID)
 	if err != nil {
 		return nil, err

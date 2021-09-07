@@ -16,6 +16,7 @@ require (
 	go.mongodb.org/mongo-driver v1.7.1
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
 	golang.org/x/sys v0.0.0-20210510120138-977fb7262007 // indirect
+	golang.org/x/tools v0.1.5 // indirect
 	google.golang.org/grpc v1.39.0
 	google.golang.org/protobuf v1.27.1
 )
